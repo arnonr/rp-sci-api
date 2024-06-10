@@ -1,0 +1,216 @@
+// This is your Prisma schema file,
+// learn more contact it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "mysql"
+    url      = env("DATABASE_URL")
+}
+
+model asset {
+    id               Int       @id @default(autoincrement())
+    asset_code       String?   @unique @db.VarChar(50)
+    asset_name       String?   @db.VarChar(200)
+    input_year       Int?      @db.Year
+    inspection_date  DateTime? @db.Date
+    approved_date    DateTime? @db.Date
+    asset_detail     String?   @db.Text
+    install_location String?   @db.VarChar(200)
+    vendor           String?   @db.VarChar(200)
+    asset_type_id    Int
+    brand            String?   @db.VarChar(200)
+    model            String?   @db.VarChar(200)
+    serial_number    String?   @db.VarChar(250)
+    price            Decimal?  @db.Decimal(10, 2)
+    budget_type_id   Int
+    is_transfer      Int?      @db.TinyInt
+    transfer_from    String?   @db.VarChar(200)
+    location         String?   @db.VarChar(200)
+    department_id    Int?
+    drawer_name      String?   @db.VarChar(200)
+    holder_name      String?   @db.VarChar(200)
+
+    warranty_type_1 String?   @db.VarChar(200)
+    warranty_day_1  Int?
+    expiry_date_1   DateTime? @db.Date
+
+    warranty_type_2 String?   @db.VarChar(200)
+    warranty_day_2  Int?
+    expiry_date_2   DateTime? @db.Date
+
+    warranty_type_3 String?   @db.VarChar(200)
+    warranty_day_3  Int?
+    expiry_date_3   DateTime? @db.Date
+
+    cover_photo            String?                  @db.VarChar(200)
+    asset_status           Int?                     @db.TinyInt
+    cancel_type            Int?                     @db.TinyInt
+    cancel_date            DateTime?                @db.Date
+    cancel_comment         String?                  @db.VarChar(200)
+    transfer_to            String?                  @db.VarChar(200)
+    transfer_to_department String?                  @db.VarChar(200)
+    comment                String?                  @db.VarChar(200)
+    is_active              Int?                     @default(1)
+    created_at             DateTime?                @default(now()) @db.DateTime(0)
+    created_by             String?                  @db.VarChar(255)
+    updated_at             DateTime?                @updatedAt
+    updated_by             String?                  @db.VarChar(255)
+    deleted_at             DateTime?
+    asset_location_history asset_location_history[]
+    holder_history         holder_history[]
+    repair_history         repair_history[]
+    asset_photo            asset_photo[]
+    asset_type             asset_type               @relation(fields: [asset_type_id], references: [id])
+    budget_type            budget_type              @relation(fields: [budget_type_id], references: [id])
+    department             department?              @relation(fields: [department_id], references: [id])
+}
+
+model asset_location_history {
+    id                Int       @id @default(autoincrement())
+    asset_id          Int
+    location          String?   @db.VarChar(200)
+    previous_location String?   @db.VarChar(200)
+    status            Int       @default(0) @db.TinyInt
+    is_notice         Int?      @default(0) @db.TinyInt
+    approved_at       DateTime?
+    approved_by       String?   @db.VarChar(32)
+    is_active         Int?      @default(1)
+    created_at        DateTime? @default(now()) @db.DateTime(0)
+    created_by        String?   @db.VarChar(255)
+    updated_at        DateTime? @updatedAt
+    updated_by        String?   @db.VarChar(255)
+    deleted_at        DateTime?
+    asset             asset     @relation(fields: [asset_id], references: [id])
+    created_user      user?     @relation(name: "CreatedBy", fields: [created_by], references: [username])
+    approved_user     user?     @relation(name: "ApprovedBy", fields: [approved_by], references: [username])
+}
+
+model asset_photo {
+    id               Int       @id @default(autoincrement())
+    asset_id         Int?
+    secret_key       String    @db.VarChar(255)
+    asset_photo_file String    @db.VarChar(200)
+    is_active        Int?      @default(1)
+    created_at       DateTime? @default(now()) @db.DateTime(0)
+    created_by       String?   @db.VarChar(255)
+    updated_at       DateTime? @updatedAt
+    updated_by       String?   @db.VarChar(255)
+    deleted_at       DateTime?
+    asset            asset?    @relation(fields: [asset_id], references: [id])
+}
+
+model asset_type {
+    id         Int       @id @default(autoincrement())
+    code       String?   @unique @db.VarChar(100)
+    name       String?   @db.VarChar(200)
+    name_abbr  String?   @db.VarChar(200)
+    is_active  Int?      @default(1)
+    created_at DateTime? @default(now()) @db.DateTime(0)
+    created_by String?   @db.VarChar(32)
+    updated_at DateTime? @updatedAt
+    updated_by String?   @db.VarChar(32)
+    deleted_at DateTime?
+    asset      asset[]
+}
+
+model budget_type {
+    id         Int       @id @default(autoincrement())
+    code       String    @db.VarChar(100)
+    name       String?   @db.VarChar(200)
+    name_abbr  String?   @db.VarChar(200)
+    category   String?   @db.VarChar(100)
+    is_active  Int?      @default(1)
+    created_at DateTime? @default(now()) @db.DateTime(0)
+    created_by String?   @db.VarChar(32)
+    updated_at DateTime? @updatedAt
+    updated_by String?   @db.VarChar(32)
+    deleted_at DateTime?
+    asset      asset[]
+}
+
+model department {
+    id         Int       @id @default(autoincrement())
+    code       String    @db.VarChar(100)
+    name       String?   @db.VarChar(200)
+    name_abbr  String?   @db.VarChar(200)
+    is_active  Int?      @default(1)
+    created_at DateTime? @default(now()) @db.DateTime(0)
+    created_by String?   @db.VarChar(32)
+    updated_at DateTime? @updatedAt
+    updated_by String?   @db.VarChar(32)
+    deleted_at DateTime?
+    user       user[]
+    asset      asset[]
+}
+
+model holder_history {
+    id                   Int       @id @default(autoincrement())
+    asset_id             Int
+    holder_name          String?   @db.VarChar(200)
+    previous_holder_name String?   @db.VarChar(200)
+    status               Int       @default(0) @db.TinyInt
+    is_notice            Int?      @default(0) @db.TinyInt
+    approved_at          DateTime?
+    approved_by          String?   @db.VarChar(32)
+    is_active            Int?      @default(1)
+    created_at           DateTime? @default(now()) @db.DateTime(0)
+    created_by           String?   @db.VarChar(255)
+    updated_at           DateTime? @updatedAt
+    updated_by           String?   @db.VarChar(255)
+    deleted_at           DateTime?
+    asset                asset     @relation(fields: [asset_id], references: [id])
+    created_user         user?     @relation(name: "CreatedBy", fields: [created_by], references: [username])
+    approved_user        user?     @relation(name: "ApprovedBy", fields: [approved_by], references: [username])
+}
+
+model repair_history {
+    id             Int       @id @default(autoincrement())
+    asset_id       Int
+    repair_date    DateTime? @db.Date
+    description    String?   @db.Text
+    price          Decimal?  @db.Decimal(10, 2)
+    is_notice      Int?      @default(0) @db.TinyInt
+    status         Int       @default(0) @db.TinyInt
+    reject_comment String?   @db.VarChar(200)
+    approved_at    DateTime?
+    approved_by    String?   @db.VarChar(32)
+    is_active      Int?      @default(1)
+    created_at     DateTime? @default(now()) @db.DateTime(0)
+    created_by     String?   @db.VarChar(255)
+    updated_at     DateTime? @updatedAt
+    updated_by     String?   @db.VarChar(255)
+    deleted_at     DateTime?
+    asset          asset     @relation(fields: [asset_id], references: [id])
+    created_user   user?     @relation(name: "CreatedBy", fields: [created_by], references: [username])
+    approved_user  user?     @relation(name: "ApprovedBy", fields: [approved_by], references: [username])
+}
+
+model user {
+    id            Int         @id @default(autoincrement())
+    username      String      @unique @db.VarChar(32)
+    password      String?     @db.VarChar(100)
+    name          String      @db.VarChar(100)
+    email         String?     @db.VarChar(100)
+    tel           String?     @db.VarChar(100)
+    level         Int         @default(1)
+    department_id Int?
+    is_active     Int?        @default(1)
+    created_at    DateTime?   @default(now()) @db.DateTime(0)
+    created_by    String?     @db.VarChar(255)
+    updated_at    DateTime?   @updatedAt
+    updated_by    String?     @db.VarChar(255)
+    deleted_at    DateTime?
+    department    department? @relation(fields: [department_id], references: [id])
+
+    created_repair_histories  repair_history[] @relation(name: "CreatedBy")
+    approved_repair_histories repair_history[] @relation(name: "ApprovedBy")
+
+    asset_location_history_created_user  asset_location_history[] @relation(name: "CreatedBy")
+    asset_location_history_approved_user asset_location_history[] @relation(name: "ApprovedBy")
+
+    holder_history_created_user  holder_history[] @relation(name: "CreatedBy")
+    holder_history_approved_user holder_history[] @relation(name: "ApprovedBy")
+}
