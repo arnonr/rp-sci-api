@@ -490,6 +490,7 @@ const methods = {
                 status_id,
                 sended_at,
                 is_active,
+                secret_key,
             } = req.body;
 
             const item = await prisma[$table].create({
@@ -524,21 +525,21 @@ const methods = {
             //     item.id,
             //     req.body.complaint_channel_ids
             // );
-            // // const JcomsCode = await generateJcomsCode(item.id);
-            // const JcomsCode = await generateJcomsYearCode(item.id);
-            // item.jcoms_no = JcomsCode.jcoms_code;
+
+            const code = "sci-001"; // await generateCode(item.id);
+            item.rp_no = code;
 
             // /* Update File Attach */
-            // if (req.body.secret_key != null) {
-            //     await prisma[$table_file_attach].updateMany({
-            //         where: {
-            //             secret_key: req.body.secret_key,
-            //         },
-            //         data: {
-            //             complaint_id: item.id,
-            //         },
-            //     });
-            // }
+            if (secret_key != null) {
+                await prisma[$table_file_attach].updateMany({
+                    where: {
+                        secret_key: secret_key,
+                    },
+                    data: {
+                        paper_id: item.id,
+                    },
+                });
+            }
 
             res.status(201).json({ ...item, msg: "success" });
         } catch (error) {
@@ -554,17 +555,30 @@ const methods = {
             authUsername = decoded.username;
         }
 
-        let receiveDocPathFile = await uploadController.onUploadFile(
-            req,
-            "/complaint/",
-            "receive_doc_filename"
-        );
-
-        if (receiveDocPathFile == "error") {
-            return res.status(500).send("error");
-        }
-
         try {
+            const {
+                user_id,
+                title_th,
+                title_en,
+                abstract,
+                keyword,
+                department_id,
+                paper_type_id,
+                history,
+                objective,
+                scope,
+                review_literature,
+                method,
+                benefit,
+                location,
+                references,
+                status_id,
+                sended_at,
+                sended_user_id,
+                is_active,
+                secret_key,
+            } = req.body;
+
             const item = await prisma[$table].update({
                 where: {
                     id: Number(req.params.id),
@@ -572,218 +586,54 @@ const methods = {
                 data: {
                     is_active:
                         req.body.is_active != null
-                            ? Number(req.body.is_active)
+                            ? Number(is_active)
                             : undefined,
-                    complaint_code:
-                        req.body.complaint_code != null
-                            ? req.body.complaint_code
+                    user_id: user_id != null ? Number(user_id) : undefined,
+                    title_th: title_th != null ? title_th : undefined,
+                    title_en: title_en != null ? title_en : undefined,
+                    abstract: abstract != null ? abstract : undefined,
+                    keyword: keyword != null ? keyword : undefined,
+                    department_id:
+                        department_id != null
+                            ? Number(department_id)
                             : undefined,
-                    tracking_satisfaction:
-                        req.body.tracking_satisfaction != null
-                            ? Number(req.body.tracking_satisfaction)
+                    paper_type_id:
+                        paper_type_id != null
+                            ? Number(paper_type_id)
                             : undefined,
-                    tracking_satisfaction_at:
-                        req.body.tracking_satisfaction_at != null
-                            ? new Date(req.body.tracking_satisfaction_at)
+                    history: history != null ? history : undefined,
+                    objective: objective != null ? objective : undefined,
+                    scope: scope != null ? scope : undefined,
+                    scope: scope != null ? scope : undefined,
+                    review_literature:
+                        review_literature != null
+                            ? review_literature
                             : undefined,
-                    complaint_satisfaction:
-                        req.body.complaint_satisfaction != null
-                            ? Number(req.body.complaint_satisfaction)
+                    method: method != null ? method : undefined,
+                    benefit: benefit != null ? benefit : undefined,
+                    location: location != null ? location : undefined,
+                    references: references != null ? references : undefined,
+                    status_id:
+                        status_id != null ? Number(status_id) : undefined,
+                    sended_at:
+                        sended_at != null ? new Date(sended_at) : undefined,
+                    sended_user_id:
+                        sended_user_id != null
+                            ? Number(sended_user_id)
                             : undefined,
-                    complaint_satisfaction_at:
-                        req.body.complaint_satisfaction_at != null
-                            ? new Date(req.body.complaint_satisfaction_at)
-                            : undefined,
-
-                    receive_at:
-                        req.body.receive_at != null
-                            ? new Date(req.body.receive_at)
-                            : undefined,
-                    receive_user_id:
-                        req.body.receive_user_id != null
-                            ? Number(req.body.receive_user_id)
-                            : undefined,
-                    pol_no:
-                        req.body.pol_no != null ? req.body.pol_no : undefined,
-                    receive_doc_no:
-                        req.body.receive_doc_no != null
-                            ? req.body.receive_doc_no
-                            : undefined,
-                    receive_doc_date:
-                        req.body.receive_doc_date != null
-                            ? new Date(req.body.receive_doc_date)
-                            : undefined,
-                    receive_status:
-                        req.body.receive_status != null
-                            ? Number(req.body.receive_status)
-                            : undefined,
-                    receive_comment:
-                        req.body.receive_comment != null
-                            ? req.body.receive_comment
-                            : undefined,
-                    receive_doc_filename:
-                        receiveDocPathFile != null
-                            ? receiveDocPathFile
-                            : undefined,
-
-                    complaint_type_id:
-                        req.body.complaint_type_id != null
-                            ? Number(req.body.complaint_type_id)
-                            : undefined,
-                    complainant_id:
-                        req.body.complainant_id != null
-                            ? Number(req.body.complainant_id)
-                            : undefined,
-                    is_anonymous:
-                        req.body.is_anonymous != null
-                            ? Number(req.body.is_anonymous)
-                            : undefined,
-                    complaint_title:
-                        req.body.complaint_title != null
-                            ? req.body.complaint_title
-                            : undefined,
-                    complaint_detail:
-                        req.body.complaint_detail != null
-                            ? req.body.complaint_detail
-                            : undefined,
-                    incident_datetime:
-                        req.body.incident_datetime != null
-                            ? new Date(req.body.incident_datetime)
-                            : undefined,
-                    location_coordinates:
-                        req.body.location_coordinates != null
-                            ? req.body.location_coordinates
-                            : undefined,
-                    incident_location:
-                        req.body.incident_location != null
-                            ? req.body.incident_location
-                            : undefined,
-                    day_time:
-                        req.body.day_time != null
-                            ? Number(req.body.day_time)
-                            : undefined,
-
-                    complaint_channel_id:
-                        req.body.complaint_channel_id != null
-                            ? Number(req.body.complaint_channel_id)
-                            : undefined,
-                    channel_history_text:
-                        req.body.channel_history_text != null
-                            ? req.body.channel_history_text
-                            : undefined,
-                    evidence_url:
-                        req.body.evidence_url != null
-                            ? req.body.evidence_url
-                            : undefined,
-
-                    inspector_id:
-                        req.body.inspector_id != null
-                            ? Number(req.body.inspector_id)
-                            : undefined,
-                    bureau_id:
-                        req.body.bureau_id != null
-                            ? Number(req.body.bureau_id)
-                            : undefined,
-                    division_id:
-                        req.body.division_id != null
-                            ? Number(req.body.division_id)
-                            : undefined,
-                    agency_id:
-                        req.body.agency_id != null
-                            ? Number(req.body.agency_id)
-                            : undefined,
-                    topic_type_id:
-                        req.body.topic_type_id != null
-                            ? Number(req.body.topic_type_id)
-                            : undefined,
-                    house_number:
-                        req.body.house_number != null
-                            ? req.body.house_number
-                            : undefined,
-                    building:
-                        req.body.building != null
-                            ? req.body.building
-                            : undefined,
-                    moo: req.body.moo != null ? req.body.moo : undefined,
-                    soi: req.body.soi != null ? req.body.soi : undefined,
-                    road: req.body.road != null ? req.body.road : undefined,
-                    postal_code:
-                        req.body.postal_code != null
-                            ? req.body.postal_code
-                            : undefined,
-                    sub_district_id:
-                        req.body.sub_district_id != null
-                            ? Number(req.body.sub_district_id)
-                            : undefined,
-                    district_id:
-                        req.body.district_id != null
-                            ? Number(req.body.district_id)
-                            : undefined,
-                    province_id:
-                        req.body.province_id != null
-                            ? Number(req.body.province_id)
-                            : undefined,
-                    state_id:
-                        req.body.state_id != null
-                            ? Number(req.body.state_id)
-                            : undefined,
-                    notice_type:
-                        req.body.notice_type != null
-                            ? req.body.notice_type
-                            : undefined,
-
-                    forward_doc_no:
-                        req.body.forward_doc_no != null
-                            ? req.body.forward_doc_no
-                            : undefined,
-                    forward_doc_date:
-                        req.body.forward_doc_date != null
-                            ? new Date(req.body.forward_doc_date)
-                            : undefined,
-
-                    closed_at:
-                        req.body.closed_at != null
-                            ? new Date(req.body.closed_at)
-                            : undefined,
-                    closed_user_id:
-                        req.body.closed_user_id != null
-                            ? Number(req.body.closed_user_id)
-                            : undefined,
-                    closed_comment:
-                        req.body.closed_comment != null
-                            ? req.body.closed_comment
-                            : undefined,
-
                     updated_by: authUsername,
                     updated_at: new Date(),
                 },
             });
 
-            if (req.body.complaint_channel_ids !== undefined) {
-                await deleteComplaintChannelHistory(req.params.id);
-                await addComplaintChannelHistory(
-                    req.params.id,
-                    req.body.complaint_channel_ids
-                );
-            }
-
-            if (item.jcoms_no == null) {
-                // const JcomsCode = await generateJcomsCode(req.params.id);
-                const JcomsCode = await generateJcomsYearCode(req.params.id);
-                // console.log(JcomsCode);
-                if (JcomsCode != null) {
-                    item.jcoms_no = JcomsCode.jcoms_no;
-                }
-            }
-
             /* Update File Attach */
-            if (req.body.secret_key != null) {
+            if (secret_key != null) {
                 await prisma[$table_file_attach].updateMany({
                     where: {
-                        secret_key: req.body.secret_key,
+                        secret_key: secret_key,
                     },
                     data: {
-                        complaint_id: item.id,
+                        paper_id: item.id,
                     },
                 });
             }
