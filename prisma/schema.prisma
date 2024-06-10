@@ -85,13 +85,13 @@ model file_attach {
 model paper {
     id                Int       @id @default(autoincrement())
     rp_no             String?   @unique @db.VarChar(100)
-    user_id           Int?      
+    user_id           Int?
     title_th          String?   @db.VarChar(1000)
     title_en          String?   @db.VarChar(1000)
     abstract          String?
     keyword           String?   @db.VarChar(1000)
-    department_id     Int?      
-    paper_type_id     Int?      
+    department_id     Int?
+    paper_type_id     Int?
     history           String?
     objective         String?
     scope             String?
@@ -100,7 +100,7 @@ model paper {
     benefit           String?
     location          String?
     references        String?
-    status_id         Int?      
+    status_id         Int?
     sended_at         DateTime?
     sended_user_id    Int?
     approved_at       DateTime?
@@ -119,8 +119,9 @@ model paper {
     file_attach  file_attach[]
     return_paper return_paper[]
 
-    user   user?    @relation(fields: [user_id], references: [id])
-    review review[]
+    user         user?       @relation(fields: [user_id], references: [id])
+    review       review[]
+    paper_type   paper_type? @relation(fields: [paper_type_id], references: [id])
 }
 
 model researcher {
@@ -224,4 +225,20 @@ model reviewer {
     deleted_by        String?   @db.VarChar(32)
     is_active         Int?      @default(1)
     review            review[]
+}
+
+model paper_type {
+    id         Int       @id @default(autoincrement())
+    name       String?   @db.VarChar(1000)
+    start_date DateTime? @default(now()) @db.DateTime(0)
+    end_date   DateTime? @default(now()) @db.DateTime(0)
+    year       String?   @db.VarChar(1000)
+    created_at DateTime? @default(now()) @db.DateTime(0)
+    created_by String?   @db.VarChar(32)
+    updated_at DateTime? @default(now()) @db.DateTime(0)
+    updated_by String?   @db.VarChar(32)
+    deleted_at DateTime?
+    deleted_by String?   @db.VarChar(32)
+    is_active  Int?      @default(1)
+    paper      paper[]
 }

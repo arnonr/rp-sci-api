@@ -15,6 +15,7 @@ const methodList = require("./api/methodList");
 const review = require("./api/review");
 const reviewer = require("./api/reviewer");
 const returnPaper = require("./api/return-paper");
+const paperType = require("./api/paper-type");
 
 router.use(
   `/api/v${process.env.API_VERSION}`,
@@ -31,6 +32,7 @@ router.use(
   router.use("/review", review),
   router.use("/reviewer", reviewer),
   router.use("/return-paper", returnPaper),
+  router.use("/paper-type", paperType),
 
 );
 
