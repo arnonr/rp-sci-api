@@ -49,7 +49,7 @@ const methods = {
     async onGetAll(req, res) {
         try {
             let $where = filterData(req);
-            let other = await countDataAndOrder(req, $where);
+            let other = await countDataAndOrder(req, $where,$table);
 
             const item = await prisma[$table].findMany({
                 select: selectField,

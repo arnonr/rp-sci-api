@@ -86,7 +86,7 @@ const methods = {
     async onGetAll(req, res) {
         try {
             let $where = filterData(req);
-            let other = await countDataAndOrder(req, $where);
+            let other = await countDataAndOrder(req, $where,$table);
 
             let prismaLang = checkLanguage(req);
 
