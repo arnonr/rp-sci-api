@@ -86,7 +86,7 @@ const methods = {
         data["created_by"] = authUsername;
         data["updated_by"] = authUsername;
 
-        const item = await prisma[table_name + "_file_attach"].create({
+        const item = await prisma["file_attach"].create({
           data: data,
         });
 

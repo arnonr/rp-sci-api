@@ -1,7 +1,7 @@
 const { PrismaClient } = require("@prisma/client");
 const { countDataAndOrder } = require("../utils/pagination");
 const prisma = new PrismaClient();
-const $table = "department";
+const $table = "budget3";
 
 const filterData = (req) => {
     let $where = {
@@ -12,10 +12,14 @@ const filterData = (req) => {
         $where["id"] = Number(req.query.id);
     }
 
-    if (req.query.name) {
-        $where["name"] = {
-            contains: req.query.name,
+    if (req.query.detail) {
+        $where["detail"] = {
+            contains: req.query.detail,
         };
+    }
+
+    if (req.query.paper_id) {
+        $where["paper_id"] = Number(req.query.paper_id);
     }
 
     if (req.query.is_active) {
@@ -28,7 +32,9 @@ const filterData = (req) => {
 // ฟิลด์ที่ต้องการ Select รวมถึง join
 const selectField = {
     id: true,
-    name: true,
+    detail: true,
+    amount: true,
+    paper_id: true,
     created_at: true,
     created_by: true,
     updated_at: true,
@@ -40,7 +46,7 @@ const methods = {
     async onGetAll(req, res) {
         try {
             let $where = filterData(req);
-            let other = await countDataAndOrder(req, $where, $table);
+            let other = await countDataAndOrder(req, $where,$table);
 
             const item = await prisma[$table].findMany({
                 select: selectField,
@@ -83,12 +89,13 @@ const methods = {
     // สร้าง
     async onCreate(req, res) {
         try {
-            const { name, code } = req.body;
+            const { detail, amount, paper_id } = req.body;
 
             const item = await prisma[$table].create({
                 data: {
-                    name,
-                    code,
+                    detail,
+                    amount: parseFloat(amount),
+                    paper_id: Number(paper_id),
                 },
             });
 
@@ -101,15 +108,16 @@ const methods = {
     // แก้ไข
     async onUpdate(req, res) {
         try {
-            const { name, code } = req.body;
+            const { detail, amount, paper_id } = req.body;
 
             const item = await prisma[$table].update({
                 where: {
                     id: Number(req.params.id),
                 },
                 data: {
-                    name: name || undefined,
-                    code: code || undefined,
+                    detail: detail || undefined,
+                    amount: amount ? parseFloat(amount) : undefined,
+                    paper_id: paper_id ? Number(paper_id) : undefined,
                 },
             });
 

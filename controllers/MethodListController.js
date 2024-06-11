@@ -47,7 +47,7 @@ const methods = {
     async onGetAll(req, res) {
         try {
             let $where = filterData(req);
-            let other = await countDataAndOrder(req, $where,$table);
+            let other = await countDataAndOrder(req, $where, $table);
 
             const item = await prisma[$table].findMany({
                 select: selectField,
@@ -94,8 +94,8 @@ const methods = {
 
             const item = await prisma[$table].create({
                 data: {
-                    start_date,
-                    end_date,
+                    start_date: start_date ? new Date(start_date) : undefined,
+                    end_date: end_date ? new Date(end_date) : undefined,
                     detail,
                     paper_id: Number(paper_id),
                 },
@@ -117,8 +117,8 @@ const methods = {
                     id: Number(req.params.id),
                 },
                 data: {
-                    start_date: start_date || undefined,
-                    end_date: end_date || undefined,
+                    start_date: start_date ? new Date(start_date) : undefined,
+                    end_date: end_date ? new Date(end_date) : undefined,
                     detail: detail || undefined,
                     paper_id: paper_id ? Number(paper_id) : undefined,
                 },

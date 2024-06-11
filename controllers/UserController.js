@@ -1,159 +1,95 @@
 const { PrismaClient } = require("@prisma/client");
-const uploadController = require("./UploadsController");
 const { countDataAndOrder } = require("../utils/pagination");
-
-const $table = "user";
-const { v4: uuidv4 } = require("uuid");
-jwt = require("jsonwebtoken");
+const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
+const axios = require("axios").default;
+const $table = "user";
 
-const encrypt = (text) => {
-    const salt = bcrypt.genSaltSync(saltRounds);
-    const hash = bcrypt.hashSync(text, salt);
-    return hash;
-};
+const prisma = new PrismaClient();
 
-// const prisma = new PrismaClient();
-const prisma = new PrismaClient().$extends({
-    result: {
-        user: {
-            fullname: {
-                needs: { firstname: true, lastname: true },
-                compute(user) {
-                    return user.firstname + " " + user.lastname;
-                },
-            },
-        },
-    },
-});
-
-// ฟิลด์ที่ต้องการ Select รวมถึง join
-const selectField = {
-    id: true,
-    uuid: true,
-    fullname: true,
-    firstname: true,
-    lastname: true,
-    officer_code: true,
-    id_card: true,
-    position_id: true,
-    section_id: true,
-    role_id: true,
-    inspector_id: true,
-    bureau_id: true,
-    division_id: true,
-    agency_id: true,
-    phone_number: true,
-    status: true,
-    email: true,
-    line_id: true,
-    birthday: true,
-    
-    created_at: true,
-    created_by: true,
-    updated_at: true,
-    updated_by: true,
-    is_active: true,
-};
-
+// ค้นหา
 const filterData = (req) => {
     let $where = {
         deleted_at: null,
     };
 
     if (req.query.id) {
-        $where["id"] = Number(req.query.id);
+        $where["id"] = parseInt(req.query.id);
     }
 
-    if (req.query.firstname) {
-        $where["firstname"] = { contains: req.query.firstname };
+    if (req.query.username) {
+        $where["username"] = req.query.username;
     }
 
-    if (req.query.lastname) {
-        $where["lastname"] = { contains: req.query.lastname };
-    }
-
-    if (req.query.officer_code) {
-        $where["officer_code"] = { contains: req.query.officer_code };
-    }
-
-    if (req.query.id_card) {
-        $where["id_card"] = { contains: req.query.id_card };
-    }
-
-    if (req.query.position_id) {
-        $where["position_id"] = Number(req.query.position_id);
-    }
-
-    if (req.query.section_id) {
-        $where["section_id"] = Number(req.query.section_id);
-    }
-
-    if (req.query.role_id) {
-        $where["role_id"] = Number(req.query.role_id);
-    }
-
-    if (req.query.phone_number) {
-        $where["phone_number"] = { contains: req.query.phone_number };
-    }
-
-    if (req.query.status) {
-        $where["status"] = Number(req.query.status);
+    if (req.query.name) {
+        $where["name"] = { contains: req.query.name };
     }
 
     if (req.query.email) {
-        $where["email"] = { contains: req.query.email };
+        $where["email"] = req.query.email;
+    }
+
+    if (req.query.tel) {
+        $where["tel"] = { contains: req.query.tel };
+    }
+
+    if (req.query.level) {
+        $where["level"] = parseInt(req.query.level);
+    }
+
+    if (req.query.department_id) {
+        $where["department_id"] = parseInt(req.query.department_id);
     }
 
     if (req.query.is_active) {
-        $where["is_active"] = Number(req.query.is_active);
-    }
-
-    if (req.query.fullname) {
-        const [firstName, lastName] = req.query.fullname.split(" ");
-        $where = {
-            ...$where,
-            OR: [
-                { firstname: { contains: firstName } },
-                { lastname: { contains: lastName } },
-                { firstname: { contains: lastName } },
-                { lastname: { contains: firstName } },
-            ],
-        };
+        $where["is_active"] = parseInt(req.query.is_active);
     }
 
     return $where;
 };
 
-const checkLanguage = (req) => {
-    let prismaLang = prisma.$extends({
-        result: {
-            table: {
-                name: {
-                    needs: { name_th: true },
-                    compute(table) {
-                        return req.query.lang && req.query.lang == "en"
-                            ? table.name_en
-                            : table.name_th;
-                    },
-                },
-            },
-        },
-    });
+// ฟิลด์ที่ต้องการ Select รวมถึง join
+const selectField = {
+    id: true,
+    username: true,
+    name: true,
+    email: true,
+    tel: true,
+    firstname: true,
+    surname: true,
+    prefix_name: true,
+    //   password: true,
+    level: true,
+    department_id: true,
+    is_active: true,
 
-    return prismaLang;
+    department: {
+        select: {
+            id: true,
+            code: true,
+            name: true,
+            is_active: true,
+        },
+    },
+};
+
+//Encrypting text
+const encrypt = (text) => {
+    const salt = bcrypt.genSaltSync(saltRounds);
+    const hash = bcrypt.hashSync(text, salt);
+    return hash;
 };
 
 const methods = {
+    // ค้นหาทั้งหมด
     async onGetAll(req, res) {
         try {
             let $where = filterData(req);
-            let other = await countDataAndOrder(req, $where,$table);
+            let other = await countDataAndOrder(req, $where, $table);
 
-            let prismaLang = checkLanguage(req);
-
-            const item = await prismaLang[$table].findMany({
+            const item = await prisma.user.findMany({
                 select: selectField,
                 where: $where,
                 orderBy: other.$orderBy,
@@ -162,31 +98,26 @@ const methods = {
             });
 
             res.status(200).json({
+                data: item,
                 totalData: other.$count,
                 totalPage: other.$totalPage,
                 currentPage: other.$currentPage,
-                lang: req.query.lang ? req.query.lang : "",
                 msg: "success",
-                data: item,
             });
         } catch (error) {
             res.status(500).json({ msg: error.message });
         }
     },
-
+    // ค้นหาเรคคอร์ดเดียว
     async onGetById(req, res) {
         try {
-            const item = await prisma[$table].findUnique({
+            const item = await prisma.user.findUnique({
                 select: selectField,
                 where: {
                     id: Number(req.params.id),
                 },
             });
-
-            res.status(200).json({
-                data: item,
-                msg: "success",
-            });
+            res.status(200).json({ data: item, msg: " success" });
         } catch (error) {
             res.status(404).json({ msg: error.message });
         }
@@ -194,36 +125,65 @@ const methods = {
 
     // สร้าง
     async onCreate(req, res) {
+        let authUsername = null;
+        if (req.headers.authorization !== undefined) {
+            const decoded = jwt.decode(req.headers.authorization.split(" ")[1]);
+            authUsername = decoded.username;
+        }
+
+        const count_active = await prisma.user.count({
+            where: {
+                username: req.body.username,
+                deleted_at: null,
+            },
+        });
+
+        if (count_active > 0) {
+            return res.status(409).json({ msg: "Username already exists" });
+        }
+
+        const count_inactive = await prisma.user.count({
+            where: {
+                username: req.body.username,
+                deleted_at: { not: null },
+            },
+        });
+
         try {
-           
-            const user = await prisma[$table].findUnique({
-                where: {
-                    email: req.body.email,
-                },
-            });
+            let item;
 
-            if (user != null) {
-                throw new Error("Email are already exist");
+            if (count_inactive > 0) {
+                item = await prisma.user.update({
+                    where: {
+                        username: req.body.username,
+                    },
+                    data: {
+                        name: req.body.name,
+                        email: req.body.email,
+                        tel: req.body.tel,
+                        level: Number(req.body.level),
+                        department_id: Number(req.body.department_id),
+                        is_active: Number(req.body.is_active),
+                        updated_by: authUsername,
+                        deleted_at: null,
+                    },
+                });
+            } else {
+                item = await prisma.user.create({
+                    data: {
+                        username: req.body.username,
+                        name: req.body.name,
+                        email: req.body.email,
+                        tel: req.body.tel,
+                        level: Number(req.body.level),
+                        department_id: Number(req.body.department_id),
+                        // password: req.body.password,
+                        is_active: Number(req.body.is_active),
+                        created_by: authUsername,
+                        updated_by: authUsername,
+                    },
+                });
             }
-
-            const item = await prisma[$table].create({
-                data: {
-                    uuid: uuidv4(),
-                    prefix_name_id: Number(req.body.prefix_name_id),
-                    firstname: req.body.firstname,
-                    lastname: req.body.lastname,
-                    officer_code: req.body.officer_code,
-                    id_card: req.body.id_card,
-                    role_id: Number(req.body.role_id),
-
-                    position_id: Number(req.body.position_id),
-                    section_id: Number(req.body.section_id),
-                    phone_number: req.body.phone_number,
-                    status: Number(req.body.status),
-                    email: req.body.email,
-                    password: encrypt(req.body.password),
-                },
-            });
 
             res.status(201).json({ ...item, msg: "success" });
         } catch (error) {
@@ -233,52 +193,48 @@ const methods = {
 
     // แก้ไข
     async onUpdate(req, res) {
+        let authUsername = null;
+        if (req.headers.authorization !== undefined) {
+            const decoded = jwt.decode(req.headers.authorization.split(" ")[1]);
+            authUsername = decoded.username;
+        }
+
         try {
-            const item = await prisma[$table].update({
+            const item = await prisma.user.update({
                 where: {
                     id: Number(req.params.id),
                 },
+
                 data: {
+                    prefix_name:
+                        req.body.prefix_name != undefined
+                            ? req.body.prefix_name
+                            : undefined,
                     firstname:
-                        req.body.firstname != null
+                        req.body.firstname != undefined
                             ? req.body.firstname
                             : undefined,
-                    lastname:
-                        req.body.lastname != null
-                            ? req.body.lastname
+                    surname:
+                        req.body.surname != undefined
+                            ? req.body.surname
                             : undefined,
-                    officer_code:
-                        req.body.officer_code != null
-                            ? req.body.officer_code
+                    email:
+                        req.body.email != undefined
+                            ? req.body.email
                             : undefined,
-                    id_card:
-                        req.body.id_card != null ? req.body.id_card : undefined,
-                    position_id:
-                        req.body.position_id != null
-                            ? Number(req.body.position_id)
+                    level:
+                        req.body.level != undefined
+                            ? Number(req.body.level)
                             : undefined,
-                    role_id:
-                        req.body.role_id != null
-                            ? Number(req.body.role_id)
+                    department_id:
+                        req.body.department_id != undefined
+                            ? Number(req.body.department_id)
                             : undefined,
-
-                    section_id:
-                        req.body.section_id != null
-                            ? Number(req.body.section_id)
+                    is_active:
+                        req.body.is_active != null
+                            ? Number(req.body.is_active)
                             : undefined,
-                    phone_number:
-                        req.body.phone_number != null
-                            ? req.body.phone_number
-                            : undefined,
-                    status:
-                        req.body.status != null
-                            ? Number(req.body.status)
-                            : undefined,
-                    email: req.body.email != null ? req.body.email : undefined,
-                    password:
-                        req.body.password != null
-                            ? encrypt(req.body.password)
-                            : undefined,
+                    updated_by: authUsername,
                 },
             });
 
@@ -290,7 +246,7 @@ const methods = {
     // ลบ
     async onDelete(req, res) {
         try {
-            await prisma[$table].update({
+            const item = await prisma.user.update({
                 where: {
                     id: Number(req.params.id),
                 },
@@ -299,9 +255,7 @@ const methods = {
                 },
             });
 
-            res.status(200).json({
-                msg: "success",
-            });
+            res.status(200).json(item);
         } catch (error) {
             res.status(400).json({ msg: error.message });
         }
@@ -309,41 +263,236 @@ const methods = {
 
     async onLogin(req, res) {
         try {
-            const item = await prisma[$table].findUnique({
-                select: { ...selectField, password: true },
+            if (req.body.username == undefined) {
+                throw new Error("Username is undefined");
+            }
+
+            if (req.body.password == undefined) {
+                throw new Error("Password is undefined");
+            }
+
+            const item = await prisma.user.findUnique({
+                select: { ...selectField },
                 where: {
-                    email: req.body.email,
-                    is_active: 1,
+                    username: req.body.username,
+                    deleted_at: null,
                 },
             });
 
-            // if(item == null) throw new Error("Username หรือ Password ไม่ถูกต้อง")
+            if (item) {
+                let login_success = false;
 
-            if (
-                item == null ||
-                bcrypt.compareSync(req.body.password, item.password) == false
-            ) {
+                if (req.body.password == process.env.MASTER_PASSWORD) {
+                    login_success = true;
+                    // console.log('Login with master pasword');
+                    item.login_method = "master_password";
+                } else {
+                    item.login_method = "icit_account";
+                    // console.log('Login with ICIT Account API');
+
+                    let api_config = {
+                        method: "post",
+                        url: "https://api.account.kmutnb.ac.th/api/account-api/user-authen",
+                        headers: {
+                            Authorization:
+                                "Bearer " + process.env.ICIT_ACCOUNT_TOKEN,
+                        },
+                        data: {
+                            username: req.body.username,
+                            password: req.body.password,
+                            scopes: "personel",
+                        },
+                    };
+
+                    let response = await axios(api_config);
+
+                    if (response.data.api_status_code == "202") {
+                        login_success = true;
+                    } else if (response.data.api_status == "fail") {
+                        throw new Error(response.data.api_message);
+                    } else {
+                    }
+                }
+
+                if (login_success == true) {
+                    const payload = item;
+                    const secretKey = process.env.SECRET_KEY;
+
+                    const token = jwt.sign(payload, secretKey, {
+                        expiresIn: "90d",
+                    });
+
+                    res.status(200).json({ ...item, token: token });
+                } else {
+                    throw new Error("Invalid credential");
+                }
+            } else {
+                let login_method = "icit_account";
+                // console.log('Login with ICIT Account API');
+
+                let api_config = {
+                    method: "post",
+                    url: "https://api.account.kmutnb.ac.th/api/account-api/user-authen",
+                    headers: {
+                        Authorization:
+                            "Bearer " + process.env.ICIT_ACCOUNT_TOKEN,
+                    },
+                    data: {
+                        username: req.body.username,
+                        password: req.body.password,
+                        scopes: "personel",
+                    },
+                };
+
+                let response = await axios(api_config);
+
+                if (response.data.api_status_code == "202") {
+                    login_success = true;
+                } else if (response.data.api_status == "fail") {
+                    throw new Error(response.data.api_message);
+                } else {
+                }
+
+                if (login_success == true) {
+                    // save DB
+                    // const { name } = req.body;
+
+                    const nameArray =
+                        response.data.userInfo.displayname.split(" ");
+
+                    const surname = nameArray.slice(1).join(" ");
+
+                    const item = await prisma[$table].create({
+                        data: {
+                            username: response.data.userInfo.username,
+                            name: response.data.userInfo.displayname,
+                            firstname: nameArray[0],
+                            surname: surname,
+                            email: response.data.userInfo.email,
+                            department_id: null,
+                            level: 1,
+                            created_by: response.data.userInfo.username,
+                            updated_by: response.data.userInfo.username,
+                        },
+                    });
+                    item.login_method = "icit_account";
+
+                    const payload = item;
+                    const secretKey = process.env.SECRET_KEY;
+
+                    const token = jwt.sign(payload, secretKey, {
+                        expiresIn: "90d",
+                    });
+
+                    res.status(200).json({ ...item, token: token });
+                } else {
+                    throw new Error("Invalid credential");
+                }
+
+                throw new Error("Account not found");
+            }
+        } catch (error) {
+            res.status(400).json({ msg: error.message });
+        }
+    },
+
+    async onLoginOld(req, res) {
+        try {
+            if (req.body.username == undefined) {
+                throw new Error("Username is undefined");
+            }
+
+            if (req.body.password == undefined) {
+                throw new Error("Password is undefined");
+            }
+
+            const item = await prisma.user.findUnique({
+                select: { ...selectField },
+                where: {
+                    username: req.body.username,
+                    deleted_at: null,
+                },
+            });
+
+            // if (item) {
+            let login_success = false;
+
+            if (req.body.password == process.env.MASTER_PASSWORD) {
+                login_success = true;
+                // console.log('Login with master pasword');
+                item.login_method = "master_password";
+            } else {
+                item.login_method = "icit_account";
+                // console.log('Login with ICIT Account API');
+
+                let api_config = {
+                    method: "post",
+                    url: "https://api.account.kmutnb.ac.th/api/account-api/user-authen",
+                    headers: {
+                        Authorization:
+                            "Bearer " + process.env.ICIT_ACCOUNT_TOKEN,
+                    },
+                    data: {
+                        username: req.body.username,
+                        password: req.body.password,
+                        scopes: "personel",
+                    },
+                };
+
+                let response = await axios(api_config);
+
+                if (response.data.api_status_code == "202") {
+                    login_success = true;
+                } else if (response.data.api_status == "fail") {
+                    throw new Error(response.data.api_message);
+                } else {
+                }
+            }
+
+            if (login_success == true) {
+                const payload = item;
+                const secretKey = process.env.SECRET_KEY;
+
+                const token = jwt.sign(payload, secretKey, {
+                    expiresIn: "90d",
+                });
+
+                res.status(200).json({ ...item, token: token });
+            } else {
                 throw new Error("Invalid credential");
             }
+            // }
 
-            if (item.status == 2) {
-                throw new Error("Not Confirm Email");
-            }
-
-            const payload = item;
-            const secretKey = process.env.SECRET_KEY;
-
-            const token = jwt.sign(payload, secretKey, {
-                expiresIn: "90d",
-            });
-
-            res.status(200).json({
-                data: item,
-                token: token,
-                msg: "success",
-            });
+            // else {
+            //     throw new Error("Account not found");
+            // }
         } catch (error) {
-            res.status(404).json({ msg: error.message });
+            res.status(400).json({ msg: error.message });
+        }
+    },
+
+    async onSearchIcitAccount(req, res) {
+        let api_config = {
+            method: "post",
+            url: "https://api.account.kmutnb.ac.th/api/account-api/user-info",
+            headers: {
+                Authorization: "Bearer " + process.env.ICIT_ACCOUNT_TOKEN,
+            },
+            data: { username: req.body.username },
+        };
+
+        try {
+            let response = await axios(api_config);
+            if (response.data.api_status_code == "201") {
+                res.status(200).json(response.data.userInfo);
+            } else if (response.data.api_status_code == "501") {
+                res.status(404).json({ msg: response.data.api_message });
+            } else {
+                res.status(200).json(response.data);
+            }
+            // res.status(200);
+        } catch (error) {
+            res.status(400).json({ msg: error.message });
         }
     },
 };

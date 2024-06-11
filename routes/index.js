@@ -9,6 +9,8 @@ const froala = require("./api/froala");
 const fileAttach = require("./api/file-attach");
 const email = require("./api/email");
 const budget = require("./api/budget");
+const budget2 = require("./api/budget2");
+const budget3 = require("./api/budget3");
 const paper = require("./api/paper");
 const researcher = require("./api/researcher");
 const methodList = require("./api/methodList");
@@ -28,6 +30,8 @@ router.use(
     router.use("/email", email),
     router.use("/paper", paper),
     router.use("/budget", budget),
+    router.use("/budget2", budget2),
+    router.use("/budget3", budget3),
     router.use("/researcher", researcher),
     router.use("/method-list", methodList),
     router.use("/review", review),

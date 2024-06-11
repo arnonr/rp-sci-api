@@ -62,18 +62,35 @@ const selectField = {
 
     budget: {
         select: {
+            id: true,
+            detail: true,
+            amount: true,
+        },
+    },
+    budget2: {
+        select: {
+            id: true,
+            detail: true,
+            amount: true,
+        },
+    },
+    budget3: {
+        select: {
+            id: true,
             detail: true,
             amount: true,
         },
     },
     file_attach: {
         select: {
+            id: true,
             filename: true,
             secret_key: true,
         },
     },
     method_list: {
         select: {
+            id: true,
             start_date: true,
             end_date: true,
             detail: true,
@@ -81,6 +98,7 @@ const selectField = {
     },
     researcher: {
         select: {
+            id: true,
             prefix_name: true,
             firstname: true,
             surname: true,
@@ -90,21 +108,30 @@ const selectField = {
             expertise: true,
             researcher_type: true,
             percentage: true,
+            department: {
+                select: {
+                    id: true,
+                    name: true,
+                },
+            },
         },
     },
     return_paper: {
         select: {
+            id: true,
             detail: true,
         },
     },
     review: {
         select: {
+            id: true,
             detail: true,
             review_status: true,
             reviewer_id: true,
             is_send_mail: true,
             reviewer: {
                 select: {
+                    id: true,
                     prefix_name: true,
                     firstname: true,
                     surname: true,
@@ -115,12 +142,14 @@ const selectField = {
     },
     paper_type: {
         select: {
+            id: true,
             name: true,
         },
     },
 
     department: {
         select: {
+            id: true,
             name: true,
         },
     },
@@ -128,8 +157,9 @@ const selectField = {
     user: {
         select: {
             // prefix_name: true,
+            id: true,
             firstname: true,
-            lastname: true,
+            surname: true,
         },
     },
 };
@@ -140,13 +170,13 @@ const filterData = (req) => {
     };
 
     if (req.query.fullname) {
-        const [firstName, lastName] = req.query.fullname.split(" ");
+        const [firstName, surName] = req.query.fullname.split(" ");
         $where["some"] = {
             OR: [
                 { firstname: firstName },
-                { lastname: lastName },
-                { firstname: lastName },
-                { lastname: firstName },
+                { surname: surName },
+                { firstname: surName },
+                { surname: firstName },
             ],
         };
     }
@@ -237,167 +267,68 @@ const filterData = (req) => {
     return $where;
 };
 
-const deleteComplaintChannelHistory = async (complaint_id) => {
-    const complaint_history = await prisma.complaint_channel_history.deleteMany(
-        {
-            where: {
-                complaint_id: Number(complaint_id),
-            },
-        }
-    );
-};
-
-const addComplaintChannelHistory = async (
-    complaint_id,
-    complaint_channel_ids,
-    authUsername
-) => {
-    if (complaint_channel_ids) {
-        // console.log(channel_ids);
-        const complaint_channel_ids_array = complaint_channel_ids.split(",");
-        for (let i = 0; i < complaint_channel_ids_array.length; i++) {
-            const item = await prisma.complaint_channel_history.create({
-                data: {
-                    complaint_id: Number(complaint_id),
-                    complaint_channel_id: Number(
-                        complaint_channel_ids_array[i]
-                    ),
-                    created_by: authUsername,
-                    created_at: new Date(),
-                },
-            });
-        }
-    }
-};
-
 const generateCode = async (id) => {
-    const item = await prisma[$table].findUnique({
-        select: {
-            rp_no: true,
-        },
-        where: {
-            id: Number(id),
-        },
-    });
-
-    if (item.rp_no != null) {
-        return null;
-    }
-
-    /* Update JCOMS Month Running */
-    const currentYear = new Date().getFullYear();
-    const currentMonth = new Date().getMonth() + 1; // Months are zero-based
-
-    const maxRunning = await prisma[$table].aggregate({
-        _max: {
-            jcoms_month_running: true,
-        },
-        where: {
-            created_at: {
-                gte: new Date(currentYear, currentMonth - 1, 1), // Start of the current month
-                lt: new Date(currentYear, currentMonth, 1), // Start of the next month
-            },
-        },
-    });
-
-    const newRunningMonth = maxRunning._max.jcoms_month_running + 1;
-    const newRunningCode = newRunningMonth.toString().padStart(5, "0");
-    const yearCode = (currentYear + 543).toString().substring(2, 4);
-    const monthCode = currentMonth.toString().padStart(2, "0");
-
-    const jcoms_code = `jcoms${yearCode}${monthCode}${newRunningCode}`;
-
-    if (item.jcoms_no == null) {
-        await prisma[$table].update({
-            where: {
-                id: Number(id),
-            },
-            data: {
-                jcoms_no: jcoms_code,
-                jcoms_month_running: newRunningMonth,
-            },
-        });
-    }
-
-    return { jcoms_code: jcoms_code, jcoms_month_running: newRunningMonth };
-};
-
-const generateJcomsYearCode = async (id) => {
-    const item = await prisma[$table].findUnique({
-        select: {
-            jcoms_no: true,
-            jcoms_year_running: true,
-        },
-        where: {
-            id: Number(id),
-        },
-    });
-
-    if (item.jcoms_no != null) {
-        return null;
-    }
-
-    /* Update JCOMS Year Running */
-
     const currentYear = new Date().getFullYear();
 
-    const maxRunning = await prisma[$table].aggregate({
-        _max: {
-            jcoms_year_running: true,
-        },
+    let year = Number(currentYear) + 543;
+
+    year = year.toString().slice(-2);
+    year = Number(year);
+
+    const find_max_item = await prisma[$table].findFirst({
         where: {
-            created_at: {
-                gte: new Date(`${currentYear}-01-01`),
-                lt: new Date(`${currentYear + 1}-01-01`),
-            },
+            running_year: year,
+            deleted_at: null,
         },
+        orderBy: {
+            running_code: "desc",
+        },
+        take: 1,
     });
 
-    const newRunningYear = maxRunning._max.jcoms_year_running + 1;
-    const newRunningCode = newRunningYear.toString().padStart(5, "0");
-    const yearCode = (currentYear + 543).toString();
-
-    const jcoms_code = `JCOMS${yearCode}${newRunningCode}`;
-
-    if (item.jcoms_no == null) {
-        await prisma[$table].update({
-            where: {
-                id: Number(id),
-            },
-            data: {
-                jcoms_no: jcoms_code,
-                jcoms_year_running: newRunningYear,
-            },
-        });
-    }
-
-    return { jcoms_code: jcoms_code, jcoms_year_running: newRunningYear };
-};
-
-const getComplainantUUIDbyPhoneNumber = async (phoneNumber) => {
-    try {
-        const item = await prisma.complainant.findUnique({
-            where: {
-                phone_number: phoneNumber,
-            },
-            select: {
-                uuid: true,
-            },
-        });
-
-        if (item) {
-            return item.uuid;
+    const padNumber = (num) => {
+        let strNum = num.toString(); // แปลงตัวเลขเป็นสตริง
+        while (strNum.length < 5) {
+            strNum = "0" + strNum; // เพิ่ม 0 ไปด้านหน้า
         }
-    } catch (error) {
-        return null;
+        return strNum;
+    };
+
+    let rp_no = null;
+    let running_code = null;
+    let running_year = year;
+
+    if (!find_max_item) {
+        running_code = 1;
+        rp_no = "sci-" + year + "00001";
+    } else {
+        running_code = find_max_item.running_code + 1;
+        rp_no = "sci-" + year + padNumber(running_code);
     }
+
+    await prisma[$table].update({
+        where: {
+            id: Number(id),
+        },
+        data: {
+            running_code: running_code,
+            running_year: Number(year),
+            rp_no: rp_no,
+        },
+    });
+
+    return {
+        rp_no: rp_no,
+        running_code: running_code,
+        running_year: running_year,
+    };
 };
 
 const methods = {
     async onGetAll(req, res) {
         try {
             let $where = filterData(req);
-            let other = await countDataAndOrder(req, $where,$table);
+            let other = await countDataAndOrder(req, $where, $table);
 
             const item = await prisma[$table].findMany({
                 select: selectField,
@@ -420,11 +351,11 @@ const methods = {
     },
 
     async onGetById(req, res) {
-        let select = excludeSpecificField(req, selectField);
+        // let select = excludeSpecificField(req, selectField);
 
         try {
             const item = await prisma[$table].findUnique({
-                select: select,
+                select: selectField,
                 where: {
                     id: Number(req.params.id),
                 },
@@ -449,6 +380,7 @@ const methods = {
 
         try {
             const {
+                is_send,
                 user_id,
                 title_th,
                 title_en,
@@ -498,13 +430,13 @@ const methods = {
                 },
             });
 
-            // await addComplaintChannelHistory(
-            //     item.id,
-            //     req.body.complaint_channel_ids
-            // );
+            if (is_send == 1 && item.rp_no == null) {
+                const code = await generateCode(item.id);
 
-            const code = "sci-001"; // await generateCode(item.id);
-            item.rp_no = code;
+                item.rp_no = code.rp_no;
+                item.running_year = code.running_year;
+                item.running_code = code.running_code;
+            }
 
             // /* Update File Attach */
             if (secret_key != null) {
@@ -554,6 +486,7 @@ const methods = {
                 sended_user_id,
                 is_active,
                 secret_key,
+                is_send,
             } = req.body;
 
             const item = await prisma[$table].update({
@@ -602,6 +535,14 @@ const methods = {
                     updated_at: new Date(),
                 },
             });
+
+            if (is_send == 1 && item.rp_no == null) {
+                const code = await generateCode(item.id);
+
+                item.rp_no = code.rp_no;
+                item.running_year = code.running_year;
+                item.running_code = code.running_code;
+            }
 
             /* Update File Attach */
             if (secret_key != null) {
