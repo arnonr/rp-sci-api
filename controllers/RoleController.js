@@ -13,8 +13,6 @@ const selectField = {
     created_by: true,
     updated_at: true,
     updated_by: true,
-    deleted_at: true,
-    deleted_by: true,
     is_active: true,
 };
 const filterData = (req) => {
