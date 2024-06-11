@@ -1,5 +1,6 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
+const { countDataAndOrder } = require("../utils/pagination");
 const $table = "researcher";
 
 const filterData = (req) => {
@@ -8,7 +9,7 @@ const filterData = (req) => {
     };
 
     if (req.query.id) {
-        $where["id"] = parseInt(req.query.id);
+        $where["id"] = Number(req.query.id);
     }
 
     if (req.query.fullname) {
@@ -24,7 +25,7 @@ const filterData = (req) => {
     }
 
     if (req.query.department_id) {
-        $where["department_id"] = parseInt(req.query.department_id);
+        $where["department_id"] = Number(req.query.department_id);
     }
 
     if (req.query.department_text) {
@@ -40,52 +41,20 @@ const filterData = (req) => {
     }
 
     if (req.query.researcher_type) {
-        $where["researcher_type"] = parseInt(req.query.researcher_type);
+        $where["researcher_type"] = Number(req.query.researcher_type);
     }
 
     if (req.query.paper_id) {
-        $where["paper_id"] = parseInt(req.query.paper_id);
+        $where["paper_id"] = Number(req.query.paper_id);
     }
 
     if (req.query.is_active) {
-        $where["is_active"] = parseInt(req.query.is_active);
+        $where["is_active"] = Number(req.query.is_active);
     }
 
     return $where;
 };
 
-// หาจำนวนทั้งหมดและลำดับ
-const countDataAndOrder = async (req, $where) => {
-    //   Order
-    let $orderBy = {};
-    if (req.query.orderBy) {
-        $orderBy[req.query.orderBy] = req.query.order;
-    } else {
-        $orderBy = { created_at: "asc" };
-    }
-
-    //Count
-    let $count = await prisma[$table].count({
-        where: $where,
-    });
-
-    let $perPage = req.query.perPage ? Number(req.query.perPage) : 10;
-    let $currentPage = req.query.currentPage
-        ? Number(req.query.currentPage)
-        : 1;
-    let $totalPage =
-        Math.ceil($count / $perPage) == 0 ? 1 : Math.ceil($count / $perPage);
-    let $offset = $perPage * ($currentPage - 1);
-
-    return {
-        $orderBy: $orderBy,
-        $offset: $offset,
-        $perPage: $perPage,
-        $count: $count,
-        $totalPage: $totalPage,
-        $currentPage: $currentPage,
-    };
-};
 
 // ฟิลด์ที่ต้องการ Select รวมถึง join
 const selectField = {
@@ -177,10 +146,10 @@ const methods = {
                     department_text,
                     phone_number,
                     expertise,
-                    researcher_type: parseInt(researcher_type),
+                    researcher_type: Number(researcher_type),
                     percentage: parseFloat(percentage),
-                    department_id: parseInt(department_id),
-                    paper_id: parseInt(paper_id),
+                    department_id: Number(department_id),
+                    paper_id: Number(paper_id),
                 },
             });
 

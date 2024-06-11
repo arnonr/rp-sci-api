@@ -1,5 +1,6 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
+const { countDataAndOrder } = require("../utils/pagination");
 const $table = "reviewer";
 
 const filterData = (req) => {
@@ -8,7 +9,7 @@ const filterData = (req) => {
     };
 
     if (req.query.id) {
-        $where["id"] = parseInt(req.query.id);
+        $where["id"] = Number(req.query.id);
     }
 
     if (req.query.prefix_name) {
@@ -36,43 +37,10 @@ const filterData = (req) => {
     }
 
     if (req.query.is_active) {
-        $where["is_active"] = parseInt(req.query.is_active);
+        $where["is_active"] = Number(req.query.is_active);
     }
 
     return $where;
-};
-
-// หาจำนวนทั้งหมดและลำดับ
-const countDataAndOrder = async (req, $where) => {
-    //   Order
-    let $orderBy = {};
-    if (req.query.orderBy) {
-        $orderBy[req.query.orderBy] = req.query.order;
-    } else {
-        $orderBy = { created_at: "asc" };
-    }
-
-    //Count
-    let $count = await prisma[$table].count({
-        where: $where,
-    });
-
-    let $perPage = req.query.perPage ? Number(req.query.perPage) : 10;
-    let $currentPage = req.query.currentPage
-        ? Number(req.query.currentPage)
-        : 1;
-    let $totalPage =
-        Math.ceil($count / $perPage) == 0 ? 1 : Math.ceil($count / $perPage);
-    let $offset = $perPage * ($currentPage - 1);
-
-    return {
-        $orderBy: $orderBy,
-        $offset: $offset,
-        $perPage: $perPage,
-        $count: $count,
-        $totalPage: $totalPage,
-        $currentPage: $currentPage,
-    };
 };
 
 // ฟิลด์ที่ต้องการ Select รวมถึง join

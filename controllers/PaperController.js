@@ -3,6 +3,7 @@ const uploadController = require("./UploadsController");
 const { v4: uuidv4 } = require("uuid");
 const $table = "paper";
 const $table_file_attach = "file-attach";
+const { countDataAndOrder } = require("../utils/pagination");
 
 const prisma = new PrismaClient();
 
@@ -114,6 +115,17 @@ const selectField = {
             },
         },
     },
+    paper_type: {
+        select: {
+            name: true,
+        },
+    },
+
+    department: {
+        select: {
+            name: true,
+        },
+    },
 
     user: {
         select: {
@@ -142,7 +154,7 @@ const filterData = (req) => {
     }
 
     if (req.query.create_year) {
-        const year = parseInt(req.query.create_year, 10);
+        const year = Number(req.query.create_year, 10);
         const startOfYear = new Date(year, 0, 1); // January 1st of the given year
         const endOfYear = new Date(year, 11, 31, 23, 59, 59, 999); // December 31st of the given year
 
@@ -187,7 +199,7 @@ const filterData = (req) => {
     }
 
     if (req.query.user_id) {
-        $where["user_id"] = parseInt(req.query.user_id);
+        $where["user_id"] = Number(req.query.user_id);
     }
 
     if (req.query.title_th) {
@@ -204,60 +216,27 @@ const filterData = (req) => {
 
     if (req.query.department_id) {
         $where["department_id"] = {
-            contains: parseInt(req.query.department_id),
+            contains: Number(req.query.department_id),
         };
     }
 
     if (req.query.paper_type_id) {
         $where["paper_type_id"] = {
-            contains: parseInt(req.query.paper_type_id),
+            contains: Number(req.query.paper_type_id),
         };
     }
 
     if (req.query.status_id) {
         $where["status_id"] = {
-            contains: parseInt(req.query.status_id),
+            contains: Number(req.query.status_id),
         };
     }
 
     if (req.query.is_active) {
-        $where["is_active"] = parseInt(req.query.is_active);
+        $where["is_active"] = Number(req.query.is_active);
     }
 
     return $where;
-};
-
-// หาจำนวนทั้งหมดและลำดับ
-const countDataAndOrder = async (req, $where) => {
-    //   Order
-    let $orderBy = {};
-    if (req.query.orderBy) {
-        $orderBy[req.query.orderBy] = req.query.order;
-    } else {
-        $orderBy = { created_at: "asc" };
-    }
-
-    //Count
-    let $count = await prisma[$table].count({
-        where: $where,
-    });
-
-    let $perPage = req.query.perPage ? Number(req.query.perPage) : 10;
-    let $currentPage = req.query.currentPage
-        ? Number(req.query.currentPage)
-        : 1;
-    let $totalPage =
-        Math.ceil($count / $perPage) == 0 ? 1 : Math.ceil($count / $perPage);
-    let $offset = $perPage * ($currentPage - 1);
-
-    return {
-        $orderBy: $orderBy,
-        $offset: $offset,
-        $perPage: $perPage,
-        $count: $count,
-        $totalPage: $totalPage,
-        $currentPage: $currentPage,
-    };
 };
 
 const deleteComplaintChannelHistory = async (complaint_id) => {

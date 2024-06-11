@@ -20,7 +20,7 @@ const filterData = (req) => {
     };
 
     if (req.query.id) {
-        $where["id"] = parseInt(req.query.id);
+        $where["id"] = Number(req.query.id);
     }
 
     if (req.query.username) {
@@ -40,7 +40,7 @@ const filterData = (req) => {
     }
 
     if (req.query.level) {
-        $where["level"] = parseInt(req.query.level);
+        $where["level"] = Number(req.query.level);
     }
 
     if (req.query.secret_confirm_email) {
@@ -48,11 +48,11 @@ const filterData = (req) => {
     }
 
     if (req.query.department_id) {
-        $where["department_id"] = parseInt(req.query.department_id);
+        $where["department_id"] = Number(req.query.department_id);
     }
 
     if (req.query.is_active) {
-        $where["is_active"] = parseInt(req.query.is_active);
+        $where["is_active"] = Number(req.query.is_active);
     }
 
     return $where;

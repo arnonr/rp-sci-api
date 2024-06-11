@@ -16,24 +16,25 @@ const review = require("./api/review");
 const reviewer = require("./api/reviewer");
 const returnPaper = require("./api/return-paper");
 const paperType = require("./api/paper-type");
+const department = require("./api/department");
 
 router.use(
-  `/api/v${process.env.API_VERSION}`,
-  router.use("/role", role),
-  router.use("/user", user),
-  router.use("/login-log", loginLog),
-  router.use("/froala", froala),
-  router.use("/file-attach", fileAttach),
-  router.use("/email", email),
-  router.use("/paper", paper),
-  router.use("/budget", budget),
-  router.use("/researcher", researcher),
-  router.use("/method-list", methodList),
-  router.use("/review", review),
-  router.use("/reviewer", reviewer),
-  router.use("/return-paper", returnPaper),
-  router.use("/paper-type", paperType),
-
+    `/api/v${process.env.API_VERSION}`,
+    router.use("/role", role),
+    router.use("/user", user),
+    router.use("/login-log", loginLog),
+    router.use("/froala", froala),
+    router.use("/file-attach", fileAttach),
+    router.use("/email", email),
+    router.use("/paper", paper),
+    router.use("/budget", budget),
+    router.use("/researcher", researcher),
+    router.use("/method-list", methodList),
+    router.use("/review", review),
+    router.use("/reviewer", reviewer),
+    router.use("/return-paper", returnPaper),
+    router.use("/paper-type", paperType),
+    router.use("/department", department)
 );
 
 module.exports = router;

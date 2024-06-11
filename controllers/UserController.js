@@ -1,5 +1,6 @@
 const { PrismaClient } = require("@prisma/client");
 const uploadController = require("./UploadsController");
+const { countDataAndOrder } = require("../utils/pagination");
 
 const $table = "user";
 const { v4: uuidv4 } = require("uuid");
@@ -64,7 +65,7 @@ const filterData = (req) => {
     };
 
     if (req.query.id) {
-        $where["id"] = parseInt(req.query.id);
+        $where["id"] = Number(req.query.id);
     }
 
     if (req.query.firstname) {
@@ -84,15 +85,15 @@ const filterData = (req) => {
     }
 
     if (req.query.position_id) {
-        $where["position_id"] = parseInt(req.query.position_id);
+        $where["position_id"] = Number(req.query.position_id);
     }
 
     if (req.query.section_id) {
-        $where["section_id"] = parseInt(req.query.section_id);
+        $where["section_id"] = Number(req.query.section_id);
     }
 
     if (req.query.role_id) {
-        $where["role_id"] = parseInt(req.query.role_id);
+        $where["role_id"] = Number(req.query.role_id);
     }
 
     if (req.query.phone_number) {
@@ -100,7 +101,7 @@ const filterData = (req) => {
     }
 
     if (req.query.status) {
-        $where["status"] = parseInt(req.query.status);
+        $where["status"] = Number(req.query.status);
     }
 
     if (req.query.email) {
@@ -108,7 +109,7 @@ const filterData = (req) => {
     }
 
     if (req.query.is_active) {
-        $where["is_active"] = parseInt(req.query.is_active);
+        $where["is_active"] = Number(req.query.is_active);
     }
 
     if (req.query.fullname) {
@@ -125,39 +126,6 @@ const filterData = (req) => {
     }
 
     return $where;
-};
-
-// หาจำนวนทั้งหมดและลำดับ
-const countDataAndOrder = async (req, $where) => {
-    //   Order
-    let $orderBy = {};
-    if (req.query.orderBy) {
-        $orderBy[req.query.orderBy] = req.query.order;
-    } else {
-        $orderBy = { created_at: "asc" };
-    }
-
-    //Count
-    let $count = await prisma[$table].count({
-        where: $where,
-    });
-
-    let $perPage = req.query.perPage ? Number(req.query.perPage) : 10;
-    let $currentPage = req.query.currentPage
-        ? Number(req.query.currentPage)
-        : 1;
-    let $totalPage =
-        Math.ceil($count / $perPage) == 0 ? 1 : Math.ceil($count / $perPage);
-    let $offset = $perPage * ($currentPage - 1);
-
-    return {
-        $orderBy: $orderBy,
-        $offset: $offset,
-        $perPage: $perPage,
-        $count: $count,
-        $totalPage: $totalPage,
-        $currentPage: $currentPage,
-    };
 };
 
 const checkLanguage = (req) => {

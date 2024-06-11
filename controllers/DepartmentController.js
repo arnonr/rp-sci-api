@@ -1,40 +1,7 @@
 const { PrismaClient } = require("@prisma/client");
 const { countDataAndOrder } = require("../utils/pagination");
-const $table = "file_attach";
-
-// const prisma = new PrismaClient();
-const prisma = new PrismaClient().$extends({
-    result: {
-        file_attach: { //extend Model name
-            filename: { // the name of the new computed field
-                needs: { filename: true }, /* field */
-                compute(model) {
-                    let filename = null;
-                    if (model.filename != null) {
-                        filename = process.env.PATH_UPLOAD + model.filename;
-                    }
-                    return filename;
-                },
-            },
-        },
-    },
-});
-
-// ฟิลด์ที่ต้องการ Select รวมถึง join
-const selectField = {
-    id: true,
-    paper_id: true,
-    filename: true,
-    secret_key: true,
-
-    created_at: true,
-    created_by: true,
-    updated_at: true,
-    updated_by: true,
-    deleted_at: true,
-    deleted_by: true,
-    is_active: true,
-};
+const prisma = new PrismaClient();
+const $table = "department";
 
 const filterData = (req) => {
     let $where = {
@@ -45,19 +12,9 @@ const filterData = (req) => {
         $where["id"] = Number(req.query.id);
     }
 
-    if (req.query.paper_id) {
-        $where["paper_id"] = Number(req.query.paper_id);
-    }
-
-    if (req.query.filename) {
-        $where["filename"] = {
-            contains: req.query.filename,
-        };
-    }
-
-    if (req.query.secret_key) {
-        $where["secret_key"] = {
-            contains: req.query.secret_key,
+    if (req.query.name) {
+        $where["name"] = {
+            contains: req.query.name,
         };
     }
 
@@ -68,12 +25,25 @@ const filterData = (req) => {
     return $where;
 };
 
+// ฟิลด์ที่ต้องการ Select รวมถึง join
+const selectField = {
+    id: true,
+    name: true,
+    created_at: true,
+    created_by: true,
+    updated_at: true,
+    updated_by: true,
+    deleted_at: true,
+    deleted_by: true,
+    is_active: true,
+};
+
 const methods = {
     async onGetAll(req, res) {
         try {
             let $where = filterData(req);
-            let other = await countDataAndOrder(req, $where);
-
+            let other = await countDataAndOrder(req, $where, $table);
+            
             const item = await prisma[$table].findMany({
                 select: selectField,
                 where: $where,
@@ -100,7 +70,6 @@ const methods = {
                 select: selectField,
                 where: {
                     id: Number(req.params.id),
-                    deleted_at: null,
                 },
             });
 
@@ -113,14 +82,50 @@ const methods = {
         }
     },
 
+    // สร้าง
+    async onCreate(req, res) {
+        try {
+            const { name } = req.body;
+
+            const item = await prisma[$table].create({
+                data: {
+                    name,
+                },
+            });
+
+            res.status(201).json({ ...item, msg: "success" });
+        } catch (error) {
+            res.status(400).json({ msg: error.message });
+        }
+    },
+
+    // แก้ไข
+    async onUpdate(req, res) {
+        try {
+            const { name } = req.body;
+
+            const item = await prisma[$table].update({
+                where: {
+                    id: Number(req.params.id),
+                },
+                data: {
+                    name: name || undefined,
+                    start_date: start_date ? new Date(start_date) : undefined,
+                    end_date: end_date ? new Date(end_date) : undefined,
+                },
+            });
+
+            res.status(200).json({ ...item, msg: "success" });
+        } catch (error) {
+            res.status(400).json({ msg: error.message });
+        }
+    },
     // ลบ
     async onDelete(req, res) {
         try {
-
             await prisma[$table].update({
                 where: {
                     id: Number(req.params.id),
-                    deleted_at: null,
                 },
                 data: {
                     deleted_at: new Date().toISOString(),
