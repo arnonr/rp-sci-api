@@ -243,20 +243,20 @@ const filterData = (req) => {
     }
 
     if (req.query.department_id) {
-        $where["department_id"] = {
-            contains: Number(req.query.department_id),
-        };
+        $where["department_id"] = req.query.department_id;
     }
 
     if (req.query.paper_type_id) {
-        $where["paper_type_id"] = {
-            contains: Number(req.query.paper_type_id),
-        };
+        $where["paper_type_id"] = req.query.paper_type_id;
     }
 
     if (req.query.status_id) {
+        $where["status_id"] = Number(req.query.status_id);
+    }
+
+    if (req.query.in_status_id) {
         $where["status_id"] = {
-            contains: Number(req.query.status_id),
+            in: req.query.in_status_id.split(",").map((item) => Number(item.trim())),
         };
     }
 
