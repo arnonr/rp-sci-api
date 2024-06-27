@@ -18,6 +18,10 @@ const filterData = (req) => {
         };
     }
 
+    if (req.query.return_status) {
+        $where["return_status"] = Number(req.query.return_status);
+    }
+
     if (req.query.paper_id) {
         $where["paper_id"] = Number(req.query.paper_id);
     }
@@ -34,6 +38,7 @@ const selectField = {
     id: true,
     detail: true,
     paper_id: true,
+    return_status: true,
     created_at: true,
     created_by: true,
     updated_at: true,
@@ -45,7 +50,7 @@ const methods = {
     async onGetAll(req, res) {
         try {
             let $where = filterData(req);
-            let other = await countDataAndOrder(req, $where,$table);
+            let other = await countDataAndOrder(req, $where, $table);
 
             const item = await prisma[$table].findMany({
                 select: selectField,
@@ -88,12 +93,13 @@ const methods = {
     // สร้าง
     async onCreate(req, res) {
         try {
-            const { detail, paper_id } = req.body;
+            const { detail, paper_id, return_status } = req.body;
 
             const item = await prisma[$table].create({
                 data: {
                     detail,
                     paper_id: Number(paper_id),
+                    return_status: Number(return_status),
                 },
             });
 
@@ -106,7 +112,7 @@ const methods = {
     // แก้ไข
     async onUpdate(req, res) {
         try {
-            const { detail, paper_id } = req.body;
+            const { detail, paper_id, return_status } = req.body;
 
             const item = await prisma[$table].update({
                 where: {
@@ -115,6 +121,9 @@ const methods = {
                 data: {
                     detail: detail || undefined,
                     paper_id: paper_id ? Number(req.body.paper_id) : undefined,
+                    return_status: return_status
+                        ? Number(return_status)
+                        : undefined,
                 },
             });
 

@@ -54,6 +54,7 @@ const selectField = {
     sended_user_id: true,
     approved_at: true,
     approved_user_id: true,
+    approved_detail: true,
     created_at: true,
     created_by: true,
     updated_at: true,
@@ -256,7 +257,9 @@ const filterData = (req) => {
 
     if (req.query.in_status_id) {
         $where["status_id"] = {
-            in: req.query.in_status_id.split(",").map((item) => Number(item.trim())),
+            in: req.query.in_status_id
+                .split(",")
+                .map((item) => Number(item.trim())),
         };
     }
 
@@ -561,6 +564,7 @@ const methods = {
             res.status(400).json({ msg: error.message });
         }
     },
+
     // ลบ
     async onDelete(req, res) {
         try {
@@ -576,6 +580,47 @@ const methods = {
             res.status(200).json({
                 msg: "success",
             });
+        } catch (error) {
+            res.status(400).json({ msg: error.message });
+        }
+    },
+
+    // อนุมติ
+    async onApprove(req, res) {
+        let authUsername = null;
+        if (req.headers.authorization !== undefined) {
+            const decoded = jwt.decode(req.headers.authorization.split(" ")[1]);
+            authUsername = decoded.username;
+        }
+
+        try {
+            const {
+                approved_at,
+                approved_user_id,
+                approved_detail,
+                status_id,
+            } = req.body;
+
+            const item = await prisma[$table].update({
+                where: {
+                    id: Number(req.params.id),
+                },
+                data: {
+                    approved_at:
+                        approved_at != null ? new Date(approved_at) : undefined,
+                    approved_user_id:
+                        approved_user_id != null
+                            ? Number(approved_user_id)
+                            : undefined,
+                    approved_detail:
+                        approved_detail != null ? approved_detail : undefined,
+                    status_id:
+                        status_id != null ? Number(status_id) : undefined,
+                    updated_by: authUsername,
+                    updated_at: new Date(),
+                },
+            });
+            res.status(200).json({ ...item, msg: "success" });
         } catch (error) {
             res.status(400).json({ msg: error.message });
         }

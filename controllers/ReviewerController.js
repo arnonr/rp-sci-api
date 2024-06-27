@@ -1,7 +1,31 @@
 const { PrismaClient } = require("@prisma/client");
-const prisma = new PrismaClient();
 const { countDataAndOrder } = require("../utils/pagination");
 const $table = "reviewer";
+
+const prisma = new PrismaClient().$extends({
+    result: {
+        reviewer: {
+            //extend Model name
+            fullname: {
+                // the name of the new computed field
+                needs: {
+                    prefix_name: true,
+                    firstname: true,
+                    surname: true,
+                } /* field */,
+                compute(model) {
+                    let fullname =
+                        model.prefix_name +
+                        model.firstname +
+                        " " +
+                        model.surname;
+
+                    return fullname;
+                },
+            },
+        },
+    },
+});
 
 const filterData = (req) => {
     let $where = {
@@ -49,6 +73,8 @@ const selectField = {
     prefix_name: true,
     firstname: true,
     surname: true,
+    fullname: true,
+    email: true,
     organization_name: true,
     created_at: true,
     created_by: true,
@@ -61,7 +87,7 @@ const methods = {
     async onGetAll(req, res) {
         try {
             let $where = filterData(req);
-            let other = await countDataAndOrder(req, $where,$table);
+            let other = await countDataAndOrder(req, $where, $table);
 
             const item = await prisma[$table].findMany({
                 select: selectField,
@@ -104,8 +130,13 @@ const methods = {
     // สร้าง
     async onCreate(req, res) {
         try {
-            const { prefix_name, firstname, surname, organization_name } =
-                req.body;
+            const {
+                prefix_name,
+                firstname,
+                surname,
+                organization_name,
+                email,
+            } = req.body;
 
             const item = await prisma[$table].create({
                 data: {
@@ -113,6 +144,7 @@ const methods = {
                     firstname,
                     surname,
                     organization_name,
+                    email,
                 },
             });
 
@@ -125,8 +157,13 @@ const methods = {
     // แก้ไข
     async onUpdate(req, res) {
         try {
-            const { prefix_name, firstname, surname, organization_name } =
-                req.body;
+            const {
+                prefix_name,
+                firstname,
+                surname,
+                organization_name,
+                email,
+            } = req.body;
 
             const item = await prisma[$table].update({
                 where: {
@@ -138,6 +175,7 @@ const methods = {
                     firstname: firstname || undefined,
                     surname: surname || undefined,
                     organization_name: organization_name || undefined,
+                    email: email || undefined,
                 },
             });
 

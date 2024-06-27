@@ -49,18 +49,28 @@ const selectField = {
     reviewer_id: true,
     paper_id: true,
     is_send_mail: true,
+    time_no_send_mail: true,
     created_at: true,
     created_by: true,
     updated_at: true,
     updated_by: true,
     is_active: true,
+    reviewer: {
+        select: {
+            id: true,
+            prefix_name: true,
+            firstname: true,
+            surname: true,
+            email: true,
+        },
+    },
 };
 
 const methods = {
     async onGetAll(req, res) {
         try {
             let $where = filterData(req);
-            let other = await countDataAndOrder(req, $where,$table);
+            let other = await countDataAndOrder(req, $where, $table);
 
             const item = await prisma[$table].findMany({
                 select: selectField,
@@ -109,6 +119,7 @@ const methods = {
                 reviewer_id,
                 paper_id,
                 is_send_mail,
+                time_no_send_mail,
             } = req.body;
 
             const item = await prisma[$table].create({
@@ -118,6 +129,7 @@ const methods = {
                     reviewer_id: Number(reviewer_id),
                     is_send_mail: Number(is_send_mail),
                     paper_id: Number(paper_id),
+                    time_no_send_mail: Number(time_no_send_mail),
                 },
             });
 
@@ -136,6 +148,7 @@ const methods = {
                 reviewer_id,
                 paper_id,
                 is_send_mail,
+                time_no_send_mail,
             } = req.body;
 
             const item = await prisma[$table].update({
@@ -152,6 +165,9 @@ const methods = {
                         ? Number(is_send_mail)
                         : undefined,
                     paper_id: paper_id ? Number(paper_id) : undefined,
+                    time_no_send_mail: time_no_send_mail
+                        ? Number(time_no_send_mail)
+                        : undefined,
                 },
             });
 

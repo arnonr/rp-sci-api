@@ -94,6 +94,7 @@ model paper {
     sended_user_id    Int?
     approved_at       DateTime?
     approved_user_id  Int?
+    approved_detail   String?
     created_at        DateTime? @default(now()) @db.DateTime(0)
     created_by        String?   @db.VarChar(32)
     updated_at        DateTime? @default(now()) @db.DateTime(0)
@@ -203,26 +204,10 @@ model budget3 {
 }
 
 model return_paper {
-    id         Int       @id @default(autoincrement())
-    detail     String?
-    paper_id   Int?
-    created_at DateTime? @default(now()) @db.DateTime(0)
-    created_by String?   @db.VarChar(32)
-    updated_at DateTime? @default(now()) @db.DateTime(0)
-    updated_by String?   @db.VarChar(32)
-    deleted_at DateTime?
-    deleted_by String?   @db.VarChar(32)
-    is_active  Int?      @default(1)
-    paper      paper?    @relation(fields: [paper_id], references: [id])
-}
-
-model review {
     id            Int       @id @default(autoincrement())
     detail        String?
-    review_status Int?
-    reviewer_id   Int?
     paper_id      Int?
-    is_send_mail  Int?
+    return_status Int?
     created_at    DateTime? @default(now()) @db.DateTime(0)
     created_by    String?   @db.VarChar(32)
     updated_at    DateTime? @default(now()) @db.DateTime(0)
@@ -231,7 +216,25 @@ model review {
     deleted_by    String?   @db.VarChar(32)
     is_active     Int?      @default(1)
     paper         paper?    @relation(fields: [paper_id], references: [id])
-    reviewer      reviewer? @relation(fields: [reviewer_id], references: [id])
+}
+
+model review {
+    id                Int       @id @default(autoincrement())
+    detail            String?
+    review_status     Int?
+    reviewer_id       Int?
+    paper_id          Int?
+    is_send_mail      Int?
+    time_no_send_mail Int?
+    created_at        DateTime? @default(now()) @db.DateTime(0)
+    created_by        String?   @db.VarChar(32)
+    updated_at        DateTime? @default(now()) @db.DateTime(0)
+    updated_by        String?   @db.VarChar(32)
+    deleted_at        DateTime?
+    deleted_by        String?   @db.VarChar(32)
+    is_active         Int?      @default(1)
+    paper             paper?    @relation(fields: [paper_id], references: [id])
+    reviewer          reviewer? @relation(fields: [reviewer_id], references: [id])
 }
 
 model reviewer {
@@ -239,6 +242,7 @@ model reviewer {
     prefix_name       String?   @db.VarChar(1000)
     firstname         String?   @db.VarChar(1000)
     surname           String?   @db.VarChar(1000)
+    email             String?   @db.VarChar(1000)
     organization_name String?   @db.VarChar(1000)
     created_at        DateTime? @default(now()) @db.DateTime(0)
     created_by        String?   @db.VarChar(32)
