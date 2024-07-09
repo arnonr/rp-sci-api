@@ -77,24 +77,24 @@ model paper {
     user_id           Int?
     title_th          String?   @db.VarChar(1000)
     title_en          String?   @db.VarChar(1000)
-    abstract          String?
+    abstract          String?   @db.Text
     keyword           String?   @db.VarChar(1000)
     department_id     Int?
     paper_type_id     Int?
-    history           String?
-    objective         String?
-    scope             String?
-    review_literature String?
-    method            String?
-    benefit           String?
-    location          String?
-    references        String?
+    history           String?   @db.Text
+    objective         String?   @db.Text
+    scope             String?   @db.Text
+    review_literature String?   @db.Text
+    method            String?   @db.Text
+    benefit           String?   @db.Text
+    location          String?   @db.Text
+    references        String?   @db.Text
     status_id         Int?
     sended_at         DateTime?
     sended_user_id    Int?
     approved_at       DateTime?
     approved_user_id  Int?
-    approved_detail   String?
+    approved_detail   String?   @db.Text
     created_at        DateTime? @default(now()) @db.DateTime(0)
     created_by        String?   @db.VarChar(32)
     updated_at        DateTime? @default(now()) @db.DateTime(0)
