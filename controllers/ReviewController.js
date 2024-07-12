@@ -1,7 +1,49 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 const { countDataAndOrder } = require("../utils/pagination");
+const nodemailer = require("nodemailer");
 const $table = "review";
+
+const sendEmail = async (mailto, subject, body) => {
+    if (mailto == "" || mailto == "" || mailto == "") {
+        return res.status(500).send("error");
+    }
+
+    if (!subject) {
+        subject = "แบบฟอร์ม........";
+    }
+
+    if (!body) {
+        body = "<h1>แบบฟอร์ม......</h1>";
+    }
+
+    try {
+        let transporter = nodemailer.createTransport({
+            host: "smtp.gmail.com",
+            port: 587,
+            secure: false,
+            auth: {
+                // ข้อมูลการเข้าสู่ระบบ
+                user: process.env.EMAIL_USERNAME, // email user ของเรา
+                pass: process.env.EMAIL_PASSWORD, // email password
+            },
+            logger: true,
+            debug: true,
+        });
+
+        await transporter.sendMail({
+            from: process.env.EMAIL_FROM, // อีเมลผู้ส่ง
+            to: mailto, // อีเมลผู้รับ สามารถกำหนดได้มากกว่า 1 อีเมล โดยขั้นด้วย ,(Comma)
+            subject: subject, // หัวข้ออีเมล
+            html: body, // html body
+        });
+
+        return true;
+    } catch (error) {
+        console.log(error);
+        return false;
+    }
+};
 
 const filterData = (req) => {
     let $where = {
@@ -191,6 +233,53 @@ const methods = {
             res.status(200).json({
                 msg: "success",
             });
+        } catch (error) {
+            res.status(400).json({ msg: error.message });
+        }
+    },
+
+    // ส่งเมล
+    async onSendMail(req, res) {
+        try {
+            const { time_no_send_mail } = req.body;
+
+            // Send Mail
+
+            const item = await prisma[$table].update({
+                where: {
+                    id: Number(req.params.id),
+                },
+                data: {
+                    time_no_send_mail: time_no_send_mail
+                        ? Number(time_no_send_mail)
+                        : undefined,
+                },
+            });
+
+            const reviewer = await prisma.reviewer.findUnique({
+                select: {
+                    email: true,
+                },
+                where: {
+                    id: Number(item.reviewer_id),
+                },
+            });
+
+            let mailto = reviewer.email;
+            let subject = "กรุณาประเมินข้อเสนอโครงการวิจัย...........";
+            let body =
+                "ลิงค์การประเมิน : <a href='" +
+                process.env.REVIEW_URL +
+                "'>คลิก</a>";
+            let result = await sendEmail(mailto, subject, body);
+
+            if (result) {
+                return res.status(200).json({ msg: "success" });
+            } else {
+                return res.status(500).json({ msg: "error" });
+            }
+
+            // res.status(200).json({ ...item, msg: "success" });
         } catch (error) {
             res.status(400).json({ msg: error.message });
         }

@@ -18,6 +18,7 @@ const review = require("./api/review");
 const reviewer = require("./api/reviewer");
 const returnPaper = require("./api/return-paper");
 const paperType = require("./api/paper-type");
+const paperKind = require("./api/paper-kind");
 const department = require("./api/department");
 
 router.use(
@@ -38,6 +39,7 @@ router.use(
     router.use("/reviewer", reviewer),
     router.use("/return-paper", returnPaper),
     router.use("/paper-type", paperType),
+    router.use("/paper-kind", paperKind),
     router.use("/department", department)
 );
 

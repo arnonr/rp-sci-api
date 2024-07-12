@@ -41,6 +41,7 @@ const selectField = {
     keyword: true,
     department_id: true,
     paper_type_id: true,
+    paper_kind_id: true,
     history: true,
     objective: true,
     scope: true,
@@ -142,6 +143,12 @@ const selectField = {
         },
     },
     paper_type: {
+        select: {
+            id: true,
+            name: true,
+        },
+    },
+    paper_kind: {
         select: {
             id: true,
             name: true,
@@ -291,7 +298,7 @@ const generateCode = async (id) => {
 
     const padNumber = (num) => {
         let strNum = num.toString(); // แปลงตัวเลขเป็นสตริง
-        while (strNum.length < 5) {
+        while (strNum.length < 6) {
             strNum = "0" + strNum; // เพิ่ม 0 ไปด้านหน้า
         }
         return strNum;
@@ -303,7 +310,7 @@ const generateCode = async (id) => {
 
     if (!find_max_item) {
         running_code = 1;
-        rp_no = "sci-" + year + "00001";
+        rp_no = "sci-" + year + "000001";
     } else {
         running_code = find_max_item.running_code + 1;
         rp_no = "sci-" + year + padNumber(running_code);
@@ -391,6 +398,7 @@ const methods = {
                 keyword,
                 department_id,
                 paper_type_id,
+                paper_kind_id,
                 history,
                 objective,
                 scope,
@@ -414,6 +422,7 @@ const methods = {
                     keyword: keyword,
                     department_id: Number(department_id),
                     paper_type_id: Number(paper_type_id),
+                    paper_kind_id: Number(paper_kind_id),
                     history: history,
                     objective: objective,
                     scope: scope,
@@ -435,7 +444,7 @@ const methods = {
 
             if (is_send == 1 && item.rp_no == null) {
                 const code = await generateCode(item.id);
-
+                
                 item.rp_no = code.rp_no;
                 item.running_year = code.running_year;
                 item.running_code = code.running_code;
@@ -476,6 +485,7 @@ const methods = {
                 keyword,
                 department_id,
                 paper_type_id,
+                paper_kind_id,
                 history,
                 objective,
                 scope,
@@ -513,6 +523,10 @@ const methods = {
                     paper_type_id:
                         paper_type_id != null
                             ? Number(paper_type_id)
+                            : undefined,
+                    paper_kind_id:
+                        paper_kind_id != null
+                            ? Number(paper_kind_id)
                             : undefined,
                     history: history != null ? history : undefined,
                     objective: objective != null ? objective : undefined,

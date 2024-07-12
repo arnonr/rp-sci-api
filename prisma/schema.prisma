@@ -81,6 +81,7 @@ model paper {
     keyword           String?   @db.VarChar(1000)
     department_id     Int?
     paper_type_id     Int?
+    paper_kind_id     Int?
     history           String?   @db.Text
     objective         String?   @db.Text
     scope             String?   @db.Text
@@ -111,10 +112,11 @@ model paper {
     file_attach  file_attach[]
     return_paper return_paper[]
 
-    user       user?       @relation(fields: [user_id], references: [id])
-    review     review[]
-    paper_type paper_type? @relation(fields: [paper_type_id], references: [id])
-    department department? @relation(fields: [department_id], references: [id])
+    user        user?       @relation(fields: [user_id], references: [id])
+    review      review[]
+    paper_type  paper_type? @relation(fields: [paper_type_id], references: [id])
+    department  department? @relation(fields: [department_id], references: [id])
+    paper_kind  paper_kind? @relation(fields: [paper_kind_id], references: [id])
 }
 
 model researcher {
@@ -161,7 +163,7 @@ model method_list {
 model budget {
     id         Int       @id @default(autoincrement())
     detail     String?
-    amount     Decimal?  @default(0.0)
+    amount     Decimal?  @default(0.00) @db.Decimal(precision: 10, scale: 2)
     paper_id   Int?
     created_at DateTime? @default(now()) @db.DateTime(0)
     created_by String?   @db.VarChar(32)
@@ -176,7 +178,7 @@ model budget {
 model budget2 {
     id         Int       @id @default(autoincrement())
     detail     String?
-    amount     Decimal?  @default(0.0)
+    amount     Decimal?  @default(0.00) @db.Decimal(precision: 10, scale: 2)
     paper_id   Int?
     created_at DateTime? @default(now()) @db.DateTime(0)
     created_by String?   @db.VarChar(32)
@@ -191,7 +193,7 @@ model budget2 {
 model budget3 {
     id         Int       @id @default(autoincrement())
     detail     String?
-    amount     Decimal?  @default(0.0)
+    amount     Decimal?  @default(0.00) @db.Decimal(precision: 10, scale: 2)
     paper_id   Int?
     created_at DateTime? @default(now()) @db.DateTime(0)
     created_by String?   @db.VarChar(32)
@@ -260,6 +262,19 @@ model paper_type {
     start_date DateTime? @default(now()) @db.DateTime(0)
     end_date   DateTime? @default(now()) @db.DateTime(0)
     year       String?   @db.VarChar(1000)
+    created_at DateTime? @default(now()) @db.DateTime(0)
+    created_by String?   @db.VarChar(32)
+    updated_at DateTime? @default(now()) @db.DateTime(0)
+    updated_by String?   @db.VarChar(32)
+    deleted_at DateTime?
+    deleted_by String?   @db.VarChar(32)
+    is_active  Int?      @default(1)
+    paper      paper[]
+}
+
+model paper_kind {
+    id         Int       @id @default(autoincrement())
+    name       String?   @db.VarChar(1000)
     created_at DateTime? @default(now()) @db.DateTime(0)
     created_by String?   @db.VarChar(32)
     updated_at DateTime? @default(now()) @db.DateTime(0)

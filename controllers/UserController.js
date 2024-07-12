@@ -281,7 +281,7 @@ const methods = {
 
             if (item) {
                 let login_success = false;
-
+                console.log(process.env.MASTER_PASSWORD)
                 if (req.body.password == process.env.MASTER_PASSWORD) {
                     login_success = true;
                     // console.log('Login with master pasword');
