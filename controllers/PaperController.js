@@ -2,7 +2,7 @@ const { PrismaClient } = require("@prisma/client");
 const uploadController = require("./UploadsController");
 const { v4: uuidv4 } = require("uuid");
 const $table = "paper";
-const $table_file_attach = "file-attach";
+const $table_file_attach = "file_attach";
 const { countDataAndOrder } = require("../utils/pagination");
 
 const prisma = new PrismaClient();
@@ -298,7 +298,7 @@ const generateCode = async (id) => {
 
     const padNumber = (num) => {
         let strNum = num.toString(); // แปลงตัวเลขเป็นสตริง
-        while (strNum.length < 6) {
+        while (strNum.length < 4) {
             strNum = "0" + strNum; // เพิ่ม 0 ไปด้านหน้า
         }
         return strNum;
