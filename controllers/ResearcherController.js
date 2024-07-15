@@ -55,7 +55,6 @@ const filterData = (req) => {
     return $where;
 };
 
-
 // ฟิลด์ที่ต้องการ Select รวมถึง join
 const selectField = {
     id: true,
@@ -66,7 +65,7 @@ const selectField = {
     department_text: true,
     phone_number: true,
     expertise: true,
-    researcher_type: true,
+    researcher_type_id: true,
     percentage: true,
     paper_id: true,
     created_at: true,
@@ -74,13 +73,21 @@ const selectField = {
     updated_at: true,
     updated_by: true,
     is_active: true,
+    department: {
+        id: true,
+        name: true,
+    },
+    researcher_type: {
+        id: true,
+        name: true,
+    },
 };
 
 const methods = {
     async onGetAll(req, res) {
         try {
             let $where = filterData(req);
-            let other = await countDataAndOrder(req, $where,$table);
+            let other = await countDataAndOrder(req, $where, $table);
 
             const item = await prisma[$table].findMany({
                 select: selectField,
@@ -131,7 +138,7 @@ const methods = {
                 department_text,
                 phone_number,
                 expertise,
-                researcher_type,
+                researcher_type_id,
                 percentage,
                 paper_id,
             } = req.body;
@@ -144,7 +151,7 @@ const methods = {
                     department_text,
                     phone_number,
                     expertise,
-                    researcher_type: Number(researcher_type),
+                    researcher_type_id: Number(researcher_type_id),
                     percentage: parseFloat(percentage),
                     department_id: Number(department_id),
                     paper_id: Number(paper_id),
@@ -168,7 +175,7 @@ const methods = {
                 department_text,
                 phone_number,
                 expertise,
-                researcher_type,
+                researcher_type_id,
                 percentage,
                 paper_id,
             } = req.body;
@@ -184,8 +191,8 @@ const methods = {
                     department_text: department_text || undefined,
                     phone_number: phone_number || undefined,
                     expertise: expertise || undefined,
-                    researcher_type: researcher_type
-                        ? Number(researcher_type)
+                    researcher_type_id: researcher_type_id
+                        ? Number(researcher_type_id)
                         : undefined,
                     percentage: percentage ? Number(percentage) : undefined,
                     department_id: department_id

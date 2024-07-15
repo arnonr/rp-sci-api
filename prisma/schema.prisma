@@ -112,35 +112,36 @@ model paper {
     file_attach  file_attach[]
     return_paper return_paper[]
 
-    user        user?       @relation(fields: [user_id], references: [id])
-    review      review[]
-    paper_type  paper_type? @relation(fields: [paper_type_id], references: [id])
-    department  department? @relation(fields: [department_id], references: [id])
-    paper_kind  paper_kind? @relation(fields: [paper_kind_id], references: [id])
+    user       user?       @relation(fields: [user_id], references: [id])
+    review     review[]
+    paper_type paper_type? @relation(fields: [paper_type_id], references: [id])
+    department department? @relation(fields: [department_id], references: [id])
+    paper_kind paper_kind? @relation(fields: [paper_kind_id], references: [id])
 }
 
 model researcher {
-    id              Int       @id @default(autoincrement())
-    prefix_name     String?   @db.VarChar(100)
-    firstname       String?   @db.VarChar(1000)
-    surname         String?   @db.VarChar(1000)
-    department_id   Int?
-    department_text String?   @db.VarChar(1000)
-    phone_number    String?   @db.VarChar(1000)
-    expertise       String?   @db.VarChar(1000)
-    researcher_type Int? // 1 หัวหน้าโครงการ //2ที่ปรึกษา //3 ผู้ร่วมวิจัย
-    percentage      Int?
-    paper_id        Int?
-    created_at      DateTime? @default(now()) @db.DateTime(0)
-    created_by      String?   @db.VarChar(32)
-    updated_at      DateTime? @default(now()) @db.DateTime(0)
-    updated_by      String?   @db.VarChar(32)
-    deleted_at      DateTime?
-    deleted_by      String?   @db.VarChar(32)
-    is_active       Int?      @default(1)
+    id                 Int       @id @default(autoincrement())
+    prefix_name        String?   @db.VarChar(100)
+    firstname          String?   @db.VarChar(1000)
+    surname            String?   @db.VarChar(1000)
+    department_id      Int?
+    researcher_type_id Int?
+    department_text    String?   @db.VarChar(1000)
+    phone_number       String?   @db.VarChar(1000)
+    expertise          String?   @db.VarChar(1000)
+    percentage         Int?
+    paper_id           Int?
+    created_at         DateTime? @default(now()) @db.DateTime(0)
+    created_by         String?   @db.VarChar(32)
+    updated_at         DateTime? @default(now()) @db.DateTime(0)
+    updated_by         String?   @db.VarChar(32)
+    deleted_at         DateTime?
+    deleted_by         String?   @db.VarChar(32)
+    is_active          Int?      @default(1)
 
-    paper      paper?      @relation(fields: [paper_id], references: [id])
-    department department? @relation(fields: [department_id], references: [id])
+    paper           paper?           @relation(fields: [paper_id], references: [id])
+    department      department?      @relation(fields: [department_id], references: [id])
+    researcher_type researcher_type? @relation(fields: [researcher_type_id], references: [id])
 }
 
 model method_list {
@@ -283,6 +284,20 @@ model paper_kind {
     deleted_by String?   @db.VarChar(32)
     is_active  Int?      @default(1)
     paper      paper[]
+}
+
+model researcher_type {
+    id         Int          @id @default(autoincrement())
+    name       String?      @db.VarChar(1000)
+    year       String?      @db.VarChar(1000)
+    created_at DateTime?    @default(now()) @db.DateTime(0)
+    created_by String?      @db.VarChar(32)
+    updated_at DateTime?    @default(now()) @db.DateTime(0)
+    updated_by String?      @db.VarChar(32)
+    deleted_at DateTime?
+    deleted_by String?      @db.VarChar(32)
+    is_active  Int?         @default(1)
+    researcher researcher[]
 }
 
 model department {
