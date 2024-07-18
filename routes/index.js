@@ -22,7 +22,7 @@ const paperKind = require("./api/paper-kind");
 const department = require("./api/department");
 
 router.use(
-    `/api/v${process.env.API_VERSION}`,
+    `${process.env.SUB_URL}/api/v${process.env.API_VERSION}`,
     router.use("/role", role),
     router.use("/user", user),
     router.use("/login-log", loginLog),
