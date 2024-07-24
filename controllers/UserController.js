@@ -370,7 +370,7 @@ const methods = {
                             surname: surname,
                             email: response.data.userInfo.email,
                             department_id: null,
-                            level: 1,
+                            level: 2,
                             created_by: response.data.userInfo.username,
                             updated_by: response.data.userInfo.username,
                         },
