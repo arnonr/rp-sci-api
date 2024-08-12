@@ -7,7 +7,30 @@ const saltRounds = 10;
 const axios = require("axios").default;
 const $table = "user";
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient().$extends({
+    result: {
+        user: {
+            //extend Model name
+            fullname: {
+                // the name of the new computed field
+                needs: {
+                    prefix_name: true,
+                    firstname: true,
+                    surname: true,
+                } /* field */,
+                compute(model) {
+                    let fullname =
+                        model.prefix_name +
+                        model.firstname +
+                        " " +
+                        model.surname;
+
+                    return fullname;
+                },
+            },
+        },
+    },
+});
 
 // ค้นหา
 const filterData = (req) => {
@@ -25,6 +48,16 @@ const filterData = (req) => {
 
     if (req.query.name) {
         $where["name"] = { contains: req.query.name };
+    }
+
+    if (req.query.fullname) {
+        const [firstName, surName] = req.query.fullname.split(" ");
+        $where["OR"] = [
+            { firstname: { contains: firstName } },
+            { surname: { contains: surName } },
+            { firstname: { contains: surName } },
+            { surname: { contains: firstName } },
+        ];
     }
 
     if (req.query.email) {
@@ -60,6 +93,7 @@ const selectField = {
     firstname: true,
     surname: true,
     prefix_name: true,
+    fullname: true,
     //   password: true,
     level: true,
     department_id: true,
@@ -262,6 +296,7 @@ const methods = {
     },
 
     async onLogin(req, res) {
+        console.log("FREEDOM");
         try {
             if (req.body.username == undefined) {
                 throw new Error("Username is undefined");
@@ -281,7 +316,7 @@ const methods = {
 
             if (item) {
                 let login_success = false;
-                console.log(process.env.MASTER_PASSWORD)
+                console.log(process.env.MASTER_PASSWORD);
                 if (req.body.password == process.env.MASTER_PASSWORD) {
                     login_success = true;
                     // console.log('Login with master pasword');

@@ -61,7 +61,6 @@ const selectField = {
     updated_at: true,
     updated_by: true,
     is_active: true,
-
     budget: {
         select: {
             id: true,
@@ -444,7 +443,7 @@ const methods = {
 
             if (is_send == 1 && item.rp_no == null) {
                 const code = await generateCode(item.id);
-                
+
                 item.rp_no = code.rp_no;
                 item.running_year = code.running_year;
                 item.running_code = code.running_code;

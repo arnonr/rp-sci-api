@@ -20,9 +20,11 @@ const returnPaper = require("./api/return-paper");
 const paperType = require("./api/paper-type");
 const paperKind = require("./api/paper-kind");
 const department = require("./api/department");
+const about = require("./api/about");
 
 router.use(
-    `${process.env.SUB_URL}/api/v${process.env.API_VERSION}`,
+    // `${process.env.SUB_URL}/api/v${process.env.API_VERSION}`,
+    `/api/v${process.env.API_VERSION}`,
     router.use("/role", role),
     router.use("/user", user),
     router.use("/login-log", loginLog),
@@ -40,7 +42,8 @@ router.use(
     router.use("/return-paper", returnPaper),
     router.use("/paper-type", paperType),
     router.use("/paper-kind", paperKind),
-    router.use("/department", department)
+    router.use("/department", department),
+    router.use("/about", about)
 );
 
 module.exports = router;

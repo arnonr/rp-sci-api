@@ -315,3 +315,16 @@ model department {
     user       user[]
     researcher researcher[]
 }
+
+model about {
+    id         Int       @id @default(autoincrement())
+    title      String?   @db.VarChar(1000)
+    detail     String?   @db.Text
+    created_at DateTime? @default(now()) @db.DateTime(0)
+    created_by String?   @db.VarChar(32)
+    updated_at DateTime? @default(now()) @db.DateTime(0)
+    updated_by String?   @db.VarChar(32)
+    deleted_at DateTime?
+    deleted_by String?   @db.VarChar(32)
+    is_active  Int?      @default(1)
+}

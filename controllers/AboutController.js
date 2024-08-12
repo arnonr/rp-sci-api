@@ -1,31 +1,7 @@
 const { PrismaClient } = require("@prisma/client");
 const { countDataAndOrder } = require("../utils/pagination");
-const $table = "reviewer";
-
-const prisma = new PrismaClient().$extends({
-    result: {
-        reviewer: {
-            //extend Model name
-            fullname: {
-                // the name of the new computed field
-                needs: {
-                    prefix_name: true,
-                    firstname: true,
-                    surname: true,
-                } /* field */,
-                compute(model) {
-                    let fullname =
-                        model.prefix_name +
-                        model.firstname +
-                        " " +
-                        model.surname;
-
-                    return fullname;
-                },
-            },
-        },
-    },
-});
+const prisma = new PrismaClient();
+const $table = "about";
 
 const filterData = (req) => {
     let $where = {
@@ -36,25 +12,9 @@ const filterData = (req) => {
         $where["id"] = Number(req.query.id);
     }
 
-    if (req.query.prefix_name) {
-        $where["prefix_name"] = {
-            contains: req.query.prefix_name,
-        };
-    }
-
-    if (req.query.fullname) {
-        const [firstName, surName] = req.query.fullname.split(" ");
-        $where["OR"] = [
-            { firstname: firstName },
-            { surname: surName },
-            { firstname: surName },
-            { surname: firstName },
-        ];
-    }
-
-    if (req.query.organization_name) {
-        $where["organization_name"] = {
-            contains: req.query.organization_name,
+    if (req.query.title) {
+        $where["title"] = {
+            contains: req.query.title,
         };
     }
 
@@ -68,12 +28,8 @@ const filterData = (req) => {
 // ฟิลด์ที่ต้องการ Select รวมถึง join
 const selectField = {
     id: true,
-    prefix_name: true,
-    firstname: true,
-    surname: true,
-    fullname: true,
-    email: true,
-    organization_name: true,
+    title: true,
+    detail: true,
     created_at: true,
     created_by: true,
     updated_at: true,
@@ -128,21 +84,12 @@ const methods = {
     // สร้าง
     async onCreate(req, res) {
         try {
-            const {
-                prefix_name,
-                firstname,
-                surname,
-                organization_name,
-                email,
-            } = req.body;
+            const { title, detail } = req.body;
 
             const item = await prisma[$table].create({
                 data: {
-                    prefix_name,
-                    firstname,
-                    surname,
-                    organization_name,
-                    email,
+                    title,
+                    detail,
                 },
             });
 
@@ -155,26 +102,15 @@ const methods = {
     // แก้ไข
     async onUpdate(req, res) {
         try {
-            const {
-                prefix_name,
-                firstname,
-                surname,
-                organization_name,
-                email,
-                is_active,
-            } = req.body;
+            const { title, detail } = req.body;
 
             const item = await prisma[$table].update({
                 where: {
                     id: Number(req.params.id),
                 },
                 data: {
-                    prefix_name: prefix_name || undefined,
-                    firstname: firstname || undefined,
-                    surname: surname || undefined,
-                    organization_name: organization_name || undefined,
-                    email: email || undefined,
-                    is_active: is_active || undefined,
+                    title: title || undefined,
+                    detail: detail || undefined,
                 },
             });
 
