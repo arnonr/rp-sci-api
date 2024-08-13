@@ -165,6 +165,7 @@ const selectField = {
         select: {
             // prefix_name: true,
             id: true,
+            prefix_name: true,
             firstname: true,
             surname: true,
         },
@@ -531,7 +532,8 @@ const methods = {
                     user_id: user_id != null ? Number(user_id) : undefined,
                     title_th: title_th != null ? title_th : undefined,
                     title_en: title_en != null ? title_en : undefined,
-                    abstract: abstract != null ? cutFroala(abstract) : undefined,
+                    abstract:
+                        abstract != null ? cutFroala(abstract) : undefined,
                     keyword: keyword != null ? cutFroala(keyword) : undefined,
                     department_id:
                         department_id != null
@@ -546,17 +548,20 @@ const methods = {
                             ? Number(paper_kind_id)
                             : undefined,
                     history: history != null ? cutFroala(history) : undefined,
-                    objective: objective != null ? cutFroala(objective) : undefined,
+                    objective:
+                        objective != null ? cutFroala(objective) : undefined,
                     scope: scope != null ? cutFroala(scope) : undefined,
                     scope: scope != null ? cutFroala(scope) : undefined,
                     review_literature:
                         review_literature != null
                             ? cutFroala(review_literature)
                             : undefined,
-                    method: method != null ? cutFroala(method ): undefined,
+                    method: method != null ? cutFroala(method) : undefined,
                     benefit: benefit != null ? cutFroala(benefit) : undefined,
-                    location: location != null ? cutFroala(location) : undefined,
-                    references: references != null ? cutFroala(references) : undefined,
+                    location:
+                        location != null ? cutFroala(location) : undefined,
+                    references:
+                        references != null ? cutFroala(references) : undefined,
                     status_id:
                         status_id != null ? Number(status_id) : undefined,
                     sended_at:
