@@ -37,6 +37,24 @@ const selectField = {
     is_active: true,
 };
 
+const cutFroala = (detail) => {
+    let detail_success =
+        detail != null
+            ? detail
+                  .replaceAll("Powered by", "")
+                  .replaceAll(
+                      '<p data-f-id="pbf" style="text-align: center; font-size: 14px; margin-top: 30px; opacity: 0.65; font-family: sans-serif;">',
+                      ""
+                  )
+                  .replaceAll(
+                      '<a href="https://www.froala.com/wysiwyg-editor?pb=1" title="Froala Editor">',
+                      ""
+                  )
+                  .replaceAll("Froala Editor</a></p>", "")
+            : undefined;
+    return detail_success;
+};
+
 const methods = {
     async onGetAll(req, res) {
         try {
@@ -89,7 +107,7 @@ const methods = {
             const item = await prisma[$table].create({
                 data: {
                     title,
-                    detail,
+                    detail: cutFroala(req.body.detail),
                 },
             });
 
@@ -110,7 +128,7 @@ const methods = {
                 },
                 data: {
                     title: title || undefined,
-                    detail: detail || undefined,
+                    detail: cutFroala(detail) || undefined,
                 },
             });
 

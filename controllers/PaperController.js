@@ -333,6 +333,24 @@ const generateCode = async (id) => {
     };
 };
 
+const cutFroala = (detail) => {
+    let detail_success =
+        detail != null
+            ? detail
+                  .replaceAll("Powered by", "")
+                  .replaceAll(
+                      '<p data-f-id="pbf" style="text-align: center; font-size: 14px; margin-top: 30px; opacity: 0.65; font-family: sans-serif;">',
+                      ""
+                  )
+                  .replaceAll(
+                      '<a href="https://www.froala.com/wysiwyg-editor?pb=1" title="Froala Editor">',
+                      ""
+                  )
+                  .replaceAll("Froala Editor</a></p>", "")
+            : undefined;
+    return detail_success;
+};
+
 const methods = {
     async onGetAll(req, res) {
         try {
@@ -417,19 +435,19 @@ const methods = {
                     user_id: Number(user_id),
                     title_th: title_th,
                     title_en: title_en,
-                    abstract: abstract,
+                    abstract: cutFroala(abstract),
                     keyword: keyword,
                     department_id: Number(department_id),
                     paper_type_id: Number(paper_type_id),
                     paper_kind_id: Number(paper_kind_id),
-                    history: history,
-                    objective: objective,
-                    scope: scope,
-                    review_literature: review_literature,
-                    method: method,
-                    benefit: benefit,
-                    location: location,
-                    references: references,
+                    history: cutFroala(history),
+                    objective: cutFroala(objective),
+                    scope: cutFroala(scope),
+                    review_literature: cutFroala(review_literature),
+                    method: cutFroala(method),
+                    benefit: cutFroala(benefit),
+                    location: cutFroala(location),
+                    references: cutFroala(references),
                     status_id: status_id ? Number(status_id) : undefined,
                     sended_at: sended_at ? new Date(sended_at) : undefined,
                     sended_user_id: Number(user_id),
@@ -513,8 +531,8 @@ const methods = {
                     user_id: user_id != null ? Number(user_id) : undefined,
                     title_th: title_th != null ? title_th : undefined,
                     title_en: title_en != null ? title_en : undefined,
-                    abstract: abstract != null ? abstract : undefined,
-                    keyword: keyword != null ? keyword : undefined,
+                    abstract: abstract != null ? cutFroala(abstract) : undefined,
+                    keyword: keyword != null ? cutFroala(keyword) : undefined,
                     department_id:
                         department_id != null
                             ? Number(department_id)
@@ -527,18 +545,18 @@ const methods = {
                         paper_kind_id != null
                             ? Number(paper_kind_id)
                             : undefined,
-                    history: history != null ? history : undefined,
-                    objective: objective != null ? objective : undefined,
-                    scope: scope != null ? scope : undefined,
-                    scope: scope != null ? scope : undefined,
+                    history: history != null ? cutFroala(history) : undefined,
+                    objective: objective != null ? cutFroala(objective) : undefined,
+                    scope: scope != null ? cutFroala(scope) : undefined,
+                    scope: scope != null ? cutFroala(scope) : undefined,
                     review_literature:
                         review_literature != null
-                            ? review_literature
+                            ? cutFroala(review_literature)
                             : undefined,
-                    method: method != null ? method : undefined,
-                    benefit: benefit != null ? benefit : undefined,
-                    location: location != null ? location : undefined,
-                    references: references != null ? references : undefined,
+                    method: method != null ? cutFroala(method ): undefined,
+                    benefit: benefit != null ? cutFroala(benefit) : undefined,
+                    location: location != null ? cutFroala(location) : undefined,
+                    references: references != null ? cutFroala(references) : undefined,
                     status_id:
                         status_id != null ? Number(status_id) : undefined,
                     sended_at:
