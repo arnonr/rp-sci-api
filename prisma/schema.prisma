@@ -77,25 +77,25 @@ model paper {
     user_id           Int?
     title_th          String?   @db.VarChar(1000)
     title_en          String?   @db.VarChar(1000)
-    abstract          String?   @db.Text
+    abstract          String?   @db.LongText
     keyword           String?   @db.VarChar(1000)
     department_id     Int?
     paper_type_id     Int?
     paper_kind_id     Int?
-    history           String?   @db.Text
-    objective         String?   @db.Text
-    scope             String?   @db.Text
-    review_literature String?   @db.Text
-    method            String?   @db.Text
-    benefit           String?   @db.Text
-    location          String?   @db.Text
-    references        String?   @db.Text
+    history           String?   @db.LongText
+    objective         String?   @db.LongText
+    scope             String?   @db.LongText
+    review_literature String?   @db.LongText
+    method            String?   @db.LongText
+    benefit           String?   @db.LongText
+    location          String?   @db.LongText
+    references        String?   @db.LongText
     status_id         Int?
     sended_at         DateTime?
     sended_user_id    Int?
     approved_at       DateTime?
     approved_user_id  Int?
-    approved_detail   String?   @db.Text
+    approved_detail   String?   @db.LongText
     created_at        DateTime? @default(now()) @db.DateTime(0)
     created_by        String?   @db.VarChar(32)
     updated_at        DateTime? @default(now()) @db.DateTime(0)
@@ -319,7 +319,7 @@ model department {
 model about {
     id         Int       @id @default(autoincrement())
     title      String?   @db.VarChar(1000)
-    detail     String?   @db.Text
+    detail     String?   @db.LongText
     created_at DateTime? @default(now()) @db.DateTime(0)
     created_by String?   @db.VarChar(32)
     updated_at DateTime? @default(now()) @db.DateTime(0)
