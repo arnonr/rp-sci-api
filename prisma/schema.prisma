@@ -117,6 +117,8 @@ model paper {
     paper_type paper_type? @relation(fields: [paper_type_id], references: [id])
     department department? @relation(fields: [department_id], references: [id])
     paper_kind paper_kind? @relation(fields: [paper_kind_id], references: [id])
+
+    @@index([status_id, created_at])
 }
 
 model researcher {
@@ -229,6 +231,24 @@ model review {
     paper_id          Int?
     is_send_mail      Int?
     time_no_send_mail Int?
+    score_1           Int?
+    score_2           Int?
+    score_3           Int?
+    score_4           Int?
+    score_5           Int?
+    score_6           Int?
+    score_7           Int?
+    score_8           Int?
+    score_9           Int?
+    score_10          Int?
+    score_11          Int?
+    score_12          Int?
+    score_13          Int?
+    budget_status     Int?
+    review_file       String?   @db.VarChar(1000)
+    comment           String?   @db.LongText
+    budget_comment    String?   @db.LongText
+    confident_comment String?   @db.LongText
     created_at        DateTime? @default(now()) @db.DateTime(0)
     created_by        String?   @db.VarChar(32)
     updated_at        DateTime? @default(now()) @db.DateTime(0)
@@ -241,20 +261,27 @@ model review {
 }
 
 model reviewer {
-    id                Int       @id @default(autoincrement())
-    prefix_name       String?   @db.VarChar(1000)
-    firstname         String?   @db.VarChar(1000)
-    surname           String?   @db.VarChar(1000)
-    email             String?   @db.VarChar(1000)
-    organization_name String?   @db.VarChar(1000)
-    created_at        DateTime? @default(now()) @db.DateTime(0)
-    created_by        String?   @db.VarChar(32)
-    updated_at        DateTime? @default(now()) @db.DateTime(0)
-    updated_by        String?   @db.VarChar(32)
-    deleted_at        DateTime?
-    deleted_by        String?   @db.VarChar(32)
-    is_active         Int?      @default(1)
-    review            review[]
+    id                 Int       @id @default(autoincrement())
+    position           String?   @db.VarChar(1000)
+    prefix_name        String?   @db.VarChar(1000)
+    firstname          String?   @db.VarChar(1000)
+    surname            String?   @db.VarChar(1000)
+    address            String?   @db.LongText
+    name_account_bank  String?   @db.VarChar(1000)
+    no_account_bank    String?   @db.VarChar(1000)
+    name_bank          String?   @db.VarChar(1000)
+    email              String?   @db.VarChar(1000)
+    password           String?   @db.VarChar(1000)
+    organization_name  String?   @db.VarChar(1000)
+    created_at         DateTime? @default(now()) @db.DateTime(0)
+    created_by         String?   @db.VarChar(32)
+    updated_at         DateTime? @default(now()) @db.DateTime(0)
+    updated_by         String?   @db.VarChar(32)
+    deleted_at         DateTime?
+    deleted_by         String?   @db.VarChar(32)
+    is_active          Int?      @default(1)
+    is_change_password Boolean   @default(true)
+    review             review[]
 }
 
 model paper_type {

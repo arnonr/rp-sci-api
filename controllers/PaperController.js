@@ -36,6 +36,71 @@ const selectField = {
     rp_no: true,
     user_id: true,
     title_th: true,
+    department_id: true,
+    paper_type_id: true,
+    paper_kind_id: true,
+    status_id: true,
+    sended_at: true,
+    sended_user_id: true,
+    approved_at: true,
+    approved_user_id: true,
+    approved_detail: true,
+    is_active: true,
+    created_at: true,
+    created_by: true,
+    paper_type: {
+        select: {
+            id: true,
+            name: true,
+        },
+    },
+    paper_kind: {
+        select: {
+            id: true,
+            name: true,
+        },
+    },
+    department: {
+        select: {
+            id: true,
+            name: true,
+        },
+    },
+    review: {
+        select: {
+            id: true,
+            review_status: true,
+            // score_1: true,
+            // score_2: true,
+            // score_3: true,
+            // score_4: true,
+            // score_5: true,
+            // score_6: true,
+            // score_7: true,
+            // score_8: true,
+            // score_9: true,
+            // score_10: true,
+            // score_11: true,
+            // score_12: true,
+            // score_13: true,
+        },
+    },
+    user: {
+        select: {
+            // prefix_name: true,
+            id: true,
+            prefix_name: true,
+            firstname: true,
+            surname: true,
+        },
+    },
+};
+
+const selectFieldId = {
+    id: true,
+    rp_no: true,
+    user_id: true,
+    title_th: true,
     title_en: true,
     abstract: true,
     keyword: true,
@@ -383,7 +448,7 @@ const methods = {
 
         try {
             const item = await prisma[$table].findUnique({
-                select: selectField,
+                select: selectFieldId,
                 where: {
                     id: Number(req.params.id),
                 },

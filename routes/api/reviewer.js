@@ -6,6 +6,8 @@ const controllers = require("../../controllers/ReviewerController");
 router.get("/", controllers.onGetAll);
 router.get("/:id", controllers.onGetById);
 
+router.post("/verify-new-password", controllers.onVerifyNewPassword);
+router.post("/login", controllers.onLogin);
 router.post("/", controllers.onCreate);
 
 router.put("/:id", controllers.onUpdate);
