@@ -171,61 +171,51 @@ const body_email = (link) => {
 <!DOCTYPE html>
 <html lang="th">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 0;
-        }
-        .container {
-            max-width: 600px;
-            margin: 20px auto;
-            background-color: #ffffff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        h2 {
-            color: #333333;
-        }
-        p {
-            color: #555555;
-            line-height: 1.6;
-        }
-        a.button {
-            display: inline-block;
-            background-color: #007bff;
-            color: #ffffff;
-            padding: 10px 20px;
-            text-decoration: none;
-            border-radius: 5px;
-            margin-top: 20px;
-        }
-        a.button:hover {
-            background-color: #0056b3;
-        }
-        .footer {
-            margin-top: 20px;
-            font-size: 12px;
-            color: #999999;
-            text-align: center;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>เชิญประเมินข้อเสนอโครงการ</title>
 </head>
-<body>
-    <div class="container">
-        <h2>เรียน ท่านผู้ประเมิน</h2>
-        <p>ท่านได้รับเชิญให้ประเมินข้อเสนอโครงการวิจัย โปรดใช้ลิงก์ด้านล่างนี้ในการเข้าถึงแบบประเมิน:</p>
-        <a href="${link}" class="button">คลิกที่นี่เพื่อประเมิน</a>
-        <p>หากท่านมีข้อสงสัย หรือต้องการข้อมูลเพิ่มเติม กรุณาติดต่อเราที่ [email or phone number].</p>
-        <p>ขอขอบคุณท่านที่สละเวลาประเมินข้อเสนอโครงการนี้</p>
-        <div class="footer">
-            <p>&copy; 2567 คณะวิทยาศาสตร์ประยุกต์. สงวนลิขสิทธิ์</p>
-        </div>
-    </div>
+<body style="margin: 0; padding: 0; background-color: #f2f4f6; font-family: 'Arial', sans-serif;">
+  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+    <tr>
+      <td align="center" style="padding: 20px 0;">
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600" style="background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+          <tr>
+            <td style="padding: 30px 40px 20px 40px;">
+              <h2 style="margin: 0 0 20px 0; color: #2c3e50;">เรียน ท่านผู้ประเมิน</h2>
+              <p style="margin: 0 0 15px 0; color: #444; line-height: 1.6;">
+                ท่านได้รับเชิญให้ร่วมประเมินข้อเสนอโครงการวิจัยผ่านระบบออนไลน์ กรุณาคลิกที่ปุ่มด้านล่างเพื่อเข้าสู่หน้าประเมิน:
+              </p>
+
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin: 20px 0;">
+                <tr>
+                  <td align="center" bgcolor="#007bff" style="border-radius: 5px;">
+                    <a href="${link}" target="_blank" style="display: inline-block; padding: 12px 24px; font-size: 16px; color: #ffffff; text-decoration: none; border-radius: 5px;">
+                      คลิกที่นี่เพื่อประเมิน
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="margin: 0 0 15px 0; color: #444; line-height: 1.6;">
+                หากท่านมีข้อสงสัยหรือต้องการสอบถามข้อมูลเพิ่มเติม กรุณาติดต่อที่ <strong>[email หรือเบอร์โทร]</strong>
+              </p>
+
+              <p style="margin-top: 30px; color: #2c3e50;">
+                ด้วยความเคารพอย่างสูง,<br />
+                <strong>ทีมงานฝ่ายวิจัย<br />คณะวิทยาศาสตร์ประยุกต์</strong>
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 20px; text-align: center; font-size: 12px; color: #999999; background-color: #f9f9f9; border-top: 1px solid #eeeeee;">
+              &copy; 2568 คณะวิทยาศาสตร์ประยุกต์ มจพ. สงวนลิขสิทธิ์
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
 </body>
 </html>
 `;
@@ -382,7 +372,8 @@ const methods = {
                     comment: comment || undefined,
                     budget_comment: budget_comment || undefined,
                     confident_comment: confident_comment || undefined,
-                    review_file: reviewPathFile != null ? reviewPathFile : undefined,
+                    review_file:
+                        reviewPathFile != null ? reviewPathFile : undefined,
                 },
             });
 

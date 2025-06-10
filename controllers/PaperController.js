@@ -558,7 +558,7 @@ const methods = {
             const decoded = jwt.decode(req.headers.authorization.split(" ")[1]);
             authUsername = decoded.username;
         }
-
+        console.log(req.body);
         try {
             const {
                 user_id,

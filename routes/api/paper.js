@@ -7,7 +7,7 @@ router.get("/", controllers.onGetAll);
 router.get("/:id", controllers.onGetById);
 
 router.post("/", controllers.onCreate);
-router.post("/approve", controllers.onApprove);
+router.post("/approve/:id", controllers.onApprove);
 
 router.put("/:id", controllers.onUpdate);
 
