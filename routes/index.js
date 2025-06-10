@@ -3,6 +3,7 @@ const express = require("express");
 const router = express.Router();
 
 const role = require("./api/role");
+const auth = require("./api/auth");
 const user = require("./api/user");
 const loginLog = require("./api/login-log");
 const froala = require("./api/froala");
@@ -23,9 +24,10 @@ const department = require("./api/department");
 const about = require("./api/about");
 
 router.use(
-    `${process.env.SUB_URL}/api/v${process.env.API_VERSION}`,
+    `${process.env.SUB_URL}/v${process.env.API_VERSION}`,
     // `/api/v${process.env.API_VERSION}`,
     router.use("/role", role),
+    router.use("/auth", auth),
     router.use("/user", user),
     router.use("/login-log", loginLog),
     router.use("/froala", froala),
