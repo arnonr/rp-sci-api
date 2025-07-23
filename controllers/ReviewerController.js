@@ -326,38 +326,36 @@ const methods = {
                 },
             });
 
-            // if (item) {
-            let login_success = false;
-
-            if (req.body.password == process.env.MASTER_PASSWORD) {
-                login_success = true;
-                // console.log('Login with master pasword');
-                item.login_method = "master_password";
-            } else {
-                let check = checkPassword(req.body.password, item.password);
-
-                if (check) {
+            if (item) {
+                let login_success = false;
+                if (req.body.password == process.env.MASTER_PASSWORD) {
                     login_success = true;
+                    // console.log('Login with master pasword');
+                    item.login_method = "master_password";
+                } else {
+                    let check = checkPassword(req.body.password, item.password);
+                    console.log(req.body.password);
+
+                    if (check) {
+                        login_success = true;
+                    }
                 }
-            }
 
-            if (login_success == true) {
-                const payload = item;
-                const secretKey = process.env.SECRET_KEY;
+                if (login_success == true) {
+                    const payload = item;
+                    const secretKey = process.env.SECRET_KEY;
 
-                const token = jwt.sign(payload, secretKey, {
-                    expiresIn: "10d",
-                });
+                    const token = jwt.sign(payload, secretKey, {
+                        expiresIn: "10d",
+                    });
 
-                res.status(200).json({ ...item, token: token });
+                    res.status(200).json({ ...item, token: token });
+                } else {
+                    throw new Error("Invalid credential");
+                }
             } else {
-                throw new Error("Invalid credential");
+                throw new Error("Account not found");
             }
-            // }
-
-            // else {
-            //     throw new Error("Account not found");
-            // }
         } catch (error) {
             res.status(400).json({ msg: error.message });
         }
