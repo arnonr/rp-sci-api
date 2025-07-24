@@ -349,7 +349,7 @@ const generateCode = async (id) => {
 
     year = year.toString().slice(-2);
     // year = Number(year);
-    year = process.env.RUNNING_YEAR;
+    year = Number(process.env.RUNNING_YEAR);
 
     const find_max_item = await prisma[$table].findFirst({
         where: {
