@@ -376,7 +376,7 @@ const generateCode = async (id) => {
 
     if (!find_max_item) {
         running_code = 1;
-        rp_no = "sci-" + year + "000001";
+        rp_no = "sci-" + year + "0001";
     } else {
         running_code = find_max_item.running_code + 1;
         rp_no = "sci-" + year + padNumber(running_code);
