@@ -333,9 +333,11 @@ const methods = {
                     // console.log('Login with master pasword');
                     item.login_method = "master_password";
                 } else {
-                    let check = checkPassword(req.body.password, item.password);
                     console.log(req.body.password);
-
+                    console.log(item.password);
+                    let check = await checkPassword(req.body.password, item.password);
+                    console.log(check);
+                    
                     if (check) {
                         login_success = true;
                     }
