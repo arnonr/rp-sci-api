@@ -198,7 +198,7 @@ const body_email = (link) => {
               </table>
 
               <p style="margin: 0 0 15px 0; color: #444; line-height: 1.6;">
-                หากท่านมีข้อสงสัยหรือต้องการสอบถามข้อมูลเพิ่มเติม กรุณาติดต่อที่ <strong>research.rp@sci.kmutnb.ac.th</strong>
+                หากท่านมีข้อสงสัยหรือต้องการสอบถามข้อมูลเพิ่มเติม กรุณาติดต่อที่ <strong>kitsiya.c@sci.kmutnb.ac.th</strong>
               </p>
 
               <p style="margin-top: 30px; color: #2c3e50;">
