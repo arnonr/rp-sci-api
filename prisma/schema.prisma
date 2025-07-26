@@ -70,39 +70,43 @@ model file_attach {
 }
 
 model paper {
-    id                Int       @id @default(autoincrement())
-    rp_no             String?   @db.VarChar(100)
+    id                Int            @id @default(autoincrement())
+    rp_no             String?        @db.VarChar(100)
     running_year      Int?
     running_code      Int?
     user_id           Int?
-    title_th          String?   @db.VarChar(1000)
-    title_en          String?   @db.VarChar(1000)
-    abstract          String?   @db.LongText
-    keyword           String?   @db.VarChar(1000)
+    title_th          String?        @db.VarChar(1000)
+    title_en          String?        @db.VarChar(1000)
+    abstract          String?        @db.LongText
+    keyword           String?        @db.VarChar(1000)
+    personal_type_id  Int?
+    personal_type     personal_type? @relation(fields: [personal_type_id], references: [id])
+    condition_id      Int?
+    condition         condition?     @relation(fields: [condition_id], references: [id])
     department_id     Int?
     paper_type_id     Int?
     paper_kind_id     Int?
-    history           String?   @db.LongText
-    objective         String?   @db.LongText
-    scope             String?   @db.LongText
-    review_literature String?   @db.LongText
-    method            String?   @db.LongText
-    benefit           String?   @db.LongText
-    location          String?   @db.LongText
-    references        String?   @db.LongText
+    history           String?        @db.LongText
+    objective         String?        @db.LongText
+    scope             String?        @db.LongText
+    review_literature String?        @db.LongText
+    method            String?        @db.LongText
+    benefit           String?        @db.LongText
+    location          String?        @db.LongText
+    references        String?        @db.LongText
     status_id         Int?
     sended_at         DateTime?
     sended_user_id    Int?
     approved_at       DateTime?
     approved_user_id  Int?
-    approved_detail   String?   @db.LongText
-    created_at        DateTime? @default(now()) @db.DateTime(0)
-    created_by        String?   @db.VarChar(32)
-    updated_at        DateTime? @default(now()) @db.DateTime(0)
-    updated_by        String?   @db.VarChar(32)
+    approved_detail   String?        @db.LongText
+    created_at        DateTime?      @default(now()) @db.DateTime(0)
+    created_by        String?        @db.VarChar(32)
+    updated_at        DateTime?      @default(now()) @db.DateTime(0)
+    updated_by        String?        @db.VarChar(32)
     deleted_at        DateTime?
-    deleted_by        String?   @db.VarChar(32)
-    is_active         Int?      @default(1)
+    deleted_by        String?        @db.VarChar(32)
+    is_active         Int?           @default(1)
 
     researcher   researcher[]
     method_list  method_list[]
@@ -354,4 +358,33 @@ model about {
     deleted_at DateTime?
     deleted_by String?   @db.VarChar(32)
     is_active  Int?      @default(1)
+}
+
+model personal_type {
+    id         Int       @id @default(autoincrement())
+    name       String?   @db.VarChar(1000)
+    created_at DateTime? @default(now()) @db.DateTime(0)
+    created_by String?   @db.VarChar(32)
+    updated_at DateTime? @default(now()) @db.DateTime(0)
+    updated_by String?   @db.VarChar(32)
+    deleted_at DateTime?
+    deleted_by String?   @db.VarChar(32)
+    is_active  Int?      @default(1)
+    paper      paper[]
+    condition  condition[]
+}
+
+model condition {
+    id               Int            @id @default(autoincrement())
+    name             String?        @db.VarChar(1000)
+    personal_type_id Int?
+    personal_type    personal_type? @relation(fields: [personal_type_id], references: [id])
+    created_at       DateTime?      @default(now()) @db.DateTime(0)
+    created_by       String?        @db.VarChar(32)
+    updated_at       DateTime?      @default(now()) @db.DateTime(0)
+    updated_by       String?        @db.VarChar(32)
+    deleted_at       DateTime?
+    deleted_by       String?        @db.VarChar(32)
+    is_active        Int?           @default(1)
+    paper            paper[]
 }

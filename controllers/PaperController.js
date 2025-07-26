@@ -48,6 +48,8 @@ const selectField = {
     is_active: true,
     created_at: true,
     created_by: true,
+    personal_type_id: true,
+    condition_id: true,
     paper_type: {
         select: {
             id: true,
@@ -61,6 +63,18 @@ const selectField = {
         },
     },
     department: {
+        select: {
+            id: true,
+            name: true,
+        },
+    },
+    personal_type: {
+        select: {
+            id: true,
+            name: true,
+        },
+    },
+    condition: {
         select: {
             id: true,
             name: true,
@@ -126,6 +140,8 @@ const selectFieldId = {
     updated_at: true,
     updated_by: true,
     is_active: true,
+    personal_type_id: true,
+    condition_id: true,
     budget: {
         select: {
             id: true,
@@ -235,6 +251,18 @@ const selectFieldId = {
             surname: true,
         },
     },
+    personal_type: {
+        select: {
+            id: true,
+            name: true,
+        },
+    },
+    condition: {
+        select: {
+            id: true,
+            name: true,
+        },
+    },
 };
 
 const filterData = (req) => {
@@ -337,6 +365,14 @@ const filterData = (req) => {
 
     if (req.query.is_active) {
         $where["is_active"] = Number(req.query.is_active);
+    }
+
+    if (req.query.personal_type_id) {
+        $where["personal_type_id"] = Number(req.query.personal_type_id);
+    }
+
+    if (req.query.condition_id) {
+        $where["condition_id"] = Number(req.query.condition_id);
     }
 
     return $where;
@@ -495,6 +531,8 @@ const methods = {
                 sended_at,
                 is_active,
                 secret_key,
+                personal_type_id,
+                condition_id,
             } = req.body;
 
             const item = await prisma[$table].create({
@@ -519,6 +557,8 @@ const methods = {
                     sended_at: sended_at ? new Date(sended_at) : undefined,
                     sended_user_id: Number(user_id),
                     is_active: Number(is_active),
+                    personal_type_id: Number(personal_type_id),
+                    condition_id: Number(condition_id),
                     created_by: authUsername,
                     updated_by: authUsername,
                     created_at: new Date(),
@@ -584,6 +624,8 @@ const methods = {
                 is_active,
                 secret_key,
                 is_send,
+                personal_type_id,
+                condition_id,
             } = req.body;
 
             const item = await prisma[$table].update({
@@ -638,6 +680,12 @@ const methods = {
                             : undefined,
                     updated_by: authUsername,
                     updated_at: new Date(),
+                    personal_type_id:
+                        personal_type_id != null
+                            ? Number(personal_type_id)
+                            : undefined,
+                    condition_id:
+                        condition_id != null ? Number(condition_id) : undefined,
                 },
             });
 

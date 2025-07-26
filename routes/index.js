@@ -22,6 +22,8 @@ const paperType = require("./api/paper-type");
 const paperKind = require("./api/paper-kind");
 const department = require("./api/department");
 const about = require("./api/about");
+const personalType = require("./api/personal-type");
+const condition = require("./api/condition");
 
 router.use(
     `${process.env.SUB_URL}/v${process.env.API_VERSION}`,
@@ -45,7 +47,9 @@ router.use(
     router.use("/paper-type", paperType),
     router.use("/paper-kind", paperKind),
     router.use("/department", department),
-    router.use("/about", about)
+    router.use("/about", about),
+    router.use("/personal-type", personalType),
+    router.use("/condition", condition)
 );
 
 module.exports = router;
