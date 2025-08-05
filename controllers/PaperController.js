@@ -558,7 +558,7 @@ const methods = {
                     sended_user_id: Number(user_id),
                     is_active: Number(is_active),
                     personal_type_id: Number(personal_type_id),
-                    condition_id: Number(condition_id),
+                    condition_id: condition_id ? Number(condition_id) : null,
                     created_by: authUsername,
                     updated_by: authUsername,
                     created_at: new Date(),
