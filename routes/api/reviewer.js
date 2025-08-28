@@ -9,6 +9,7 @@ router.get("/:id", controllers.onGetById);
 router.post("/verify-new-password", controllers.onVerifyNewPassword);
 router.post("/login", controllers.onLogin);
 router.post("/", controllers.onCreate);
+router.post("/forgot-password", controllers.onForgotPassword);
 
 router.put("/:id", controllers.onUpdate);
 
