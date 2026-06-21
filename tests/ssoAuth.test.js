@@ -39,3 +39,73 @@ describe('ssoAuth.exchangeCodeForToken', () => {
       .rejects.toBeDefined();
   });
 });
+
+describe('ssoAuth.getUserInfoFromSSO', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    process.env.SSO_USERINFO_URL = 'https://sso.test/userinfo';
+  });
+
+  test('returns raw userinfo on success', async () => {
+    const profile = { username: 'u1', pid: 'p1', displayname: 'U One', email: 'u1@x' };
+    axios.get.mockResolvedValue({ data: profile });
+    const result = await getUserInfoFromSSO('tok');
+    expect(result).toEqual(profile);
+    expect(axios.get).toHaveBeenCalledWith(
+      'https://sso.test/userinfo',
+      expect.objectContaining({ headers: { Authorization: 'Bearer tok' } })
+    );
+  });
+
+  test('throws on 401', async () => {
+    axios.get.mockRejectedValue({ response: { status: 401 } });
+    await expect(getUserInfoFromSSO('bad-tok')).rejects.toBeDefined();
+  });
+});
+
+describe('ssoAuth.normalizeSSOUserInfo', () => {
+  test('maps displayname to firstname/surname and keeps pid/username/email', () => {
+    const raw = {
+      username: 'somchai',
+      pid: '1234567890123',
+      displayname: 'Somchai Jaidee',
+      email: 'somchai@x',
+      faculty_code: 'sci',
+      department_code: 'sci-cs',
+    };
+    const out = normalizeSSOUserInfo(raw);
+    expect(out).toEqual({
+      username: 'somchai',
+      pid: '1234567890123',
+      email: 'somchai@x',
+      firstname: 'Somchai',
+      surname: 'Jaidee',
+      name: 'Somchai Jaidee',
+    });
+  });
+
+  test('handles single-word displayname (no surname)', () => {
+    const raw = { username: 'u', pid: 'p', displayname: 'Cherprang', email: 'c@x' };
+    const out = normalizeSSOUserInfo(raw);
+    expect(out.firstname).toBe('Cherprang');
+    expect(out.surname).toBe('');
+    expect(out.name).toBe('Cherprang');
+  });
+
+  test('handles 3-word displayname (joins rest as surname)', () => {
+    const raw = { username: 'u', pid: 'p', displayname: 'A B C', email: 'a@x' };
+    const out = normalizeSSOUserInfo(raw);
+    expect(out.firstname).toBe('A');
+    expect(out.surname).toBe('B C');
+  });
+
+  test('throws when username missing', () => {
+    expect(() => normalizeSSOUserInfo({ pid: 'p', displayname: 'X', email: 'x@x' }))
+      .toThrow('username');
+  });
+
+  test('throws when pid missing', () => {
+    expect(() => normalizeSSOUserInfo({ username: 'u', displayname: 'X', email: 'x@x' }))
+      .toThrow('pid');
+  });
+});
