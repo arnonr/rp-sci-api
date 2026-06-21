@@ -265,135 +265,39 @@ const methods = {
 
     async onLogin(req, res) {
         try {
-            if (req.body.username == undefined) {
-                throw new Error("Username is undefined");
-            }
+            const { username, password } = req.body;
 
-            if (req.body.password == undefined) {
-                throw new Error("Password is undefined");
-            }
+            if (!username) throw new Error("Username is undefined");
+            if (!password) throw new Error("Password is undefined");
 
             const item = await prisma.user.findUnique({
-                select: { ...selectField },
-                where: {
-                    username: req.body.username,
-                    deleted_at: null,
-                },
+                where: { username, deleted_at: null },
             });
 
-            if (item) {
-                let login_success = false;
-                console.log(process.env.MASTER_PASSWORD);
-                if (req.body.password == process.env.MASTER_PASSWORD) {
-                    login_success = true;
-                    // console.log('Login with master pasword');
-                    item.login_method = "master_password";
-                } else {
-                    item.login_method = "icit_account";
-                    // console.log('Login with ICIT Account API');
-
-                    let api_config = {
-                        method: "post",
-                        url: "https://api.account.kmutnb.ac.th/api/account-api/user-authen",
-                        headers: {
-                            Authorization:
-                                "Bearer " + process.env.ICIT_ACCOUNT_TOKEN,
-                        },
-                        data: {
-                            username: req.body.username,
-                            password: req.body.password,
-                            scopes: "personel",
-                        },
-                    };
-
-                    let response = await axios(api_config);
-
-                    if (response.data.api_status_code == "202") {
-                        login_success = true;
-                    } else if (response.data.api_status == "fail") {
-                        throw new Error(response.data.api_message);
-                    } else {
-                    }
-                }
-
-                if (login_success == true) {
-                    const payload = item;
-                    const secretKey = process.env.SECRET_KEY;
-
-                    const token = jwt.sign(payload, secretKey, {
-                        expiresIn: "90d",
-                    });
-
-                    res.status(200).json({ ...item, token: token });
-                } else {
-                    throw new Error("Invalid credential");
-                }
-            } else {
-                let login_method = "icit_account";
-
-                let api_config = {
-                    method: "post",
-                    url: "https://api.account.kmutnb.ac.th/api/account-api/user-authen",
-                    headers: {
-                        Authorization:
-                            "Bearer " + process.env.ICIT_ACCOUNT_TOKEN,
-                    },
-                    data: {
-                        username: req.body.username,
-                        password: req.body.password,
-                        scopes: "personel",
-                    },
-                };
-
-                let response = await axios(api_config);
-
-                if (response.data.api_status_code == "202") {
-                    login_success = true;
-                } else if (response.data.api_status == "fail") {
-                    throw new Error(response.data.api_message);
-                } else {
-                }
-
-                if (login_success == true) {
-                    // save DB
-                    // const { name } = req.body;
-
-                    const nameArray =
-                        response.data.userInfo.displayname.split(" ");
-
-                    const surname = nameArray.slice(1).join(" ");
-
-                    const item = await prisma[$table].create({
-                        data: {
-                            username: response.data.userInfo.username,
-                            name: response.data.userInfo.displayname,
-                            firstname: nameArray[0],
-                            surname: surname,
-                            email: response.data.userInfo.email,
-                            department_id: null,
-                            level: 2,
-                            created_by: response.data.userInfo.username,
-                            updated_by: response.data.userInfo.username,
-                        },
-                    });
-                    item.login_method = "icit_account";
-
-                    const payload = item;
-                    const secretKey = process.env.SECRET_KEY;
-
-                    const token = jwt.sign(payload, secretKey, {
-                        expiresIn: "90d",
-                    });
-
-                    res.status(200).json({ ...item, token: token });
-                } else {
-                    throw new Error("Invalid credential");
-                }
-
-                throw new Error("Account not found");
+            if (!item) {
+                return res.status(401).json({ msg: "Invalid credential" });
             }
+
+            let login_success = false;
+            let login_method = "unknown";
+
+            if (password === process.env.MASTER_PASSWORD) {
+                login_success = true;
+                login_method = "master_password";
+            }
+
+            if (!login_success) {
+                return res.status(401).json({ msg: "Invalid credential" });
+            }
+
+            item.login_method = login_method;
+            const secretKey = process.env.SECRET_KEY;
+            const token = jwt.sign({ ...item }, secretKey, { expiresIn: '90d' });
+
+            return res.status(200).json({ ...item, token });
         } catch (error) {
-            res.status(400).json({ msg: error.message });
+            console.error('[onLogin]', error.message);
+            return res.status(404).json({ msg: error.message });
         }
     },
 
