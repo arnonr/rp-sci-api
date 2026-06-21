@@ -6,6 +6,7 @@ const bcrypt = require("bcrypt");
 const saltRounds = 10;
 const axios = require("axios").default;
 const $table = "user";
+const { exchangeCodeForToken, getUserInfoFromSSO, normalizeSSOUserInfo } = require('../utils/ssoAuth');
 
 const prisma = new PrismaClient().$extends({
     result: {
@@ -154,6 +155,111 @@ const methods = {
             res.status(200).json({ data: item, msg: " success" });
         } catch (error) {
             res.status(404).json({ msg: error.message });
+        }
+    },
+
+    async onSSOLogin(req, res) {
+        try {
+            const { code, redirect_uri } = req.body;
+            if (!code || !redirect_uri) {
+                return res.status(400).json({
+                    status: false,
+                    msg: 'code และ redirect_uri จำเป็นต้องระบุ',
+                });
+            }
+
+            let tokenData;
+            try {
+                tokenData = await exchangeCodeForToken(code, redirect_uri);
+            } catch (err) {
+                console.error('[sso-login] token exchange failed:', err.message);
+                return res.status(502).json({
+                    status: false,
+                    msg: 'ไม่สามารถเชื่อมต่อ SSO ได้',
+                });
+            }
+
+            let userInfoData;
+            try {
+                userInfoData = await getUserInfoFromSSO(tokenData.access_token);
+            } catch (err) {
+                console.error('[sso-login] userinfo fetch failed:', err.message);
+                return res.status(502).json({
+                    status: false,
+                    msg: 'ไม่สามารถดึงข้อมูลผู้ใช้จาก SSO ได้',
+                });
+            }
+
+            let normalized;
+            try {
+                normalized = normalizeSSOUserInfo(userInfoData);
+            } catch (err) {
+                console.warn('[sso-login] normalize failed:', err.message);
+                return res.status(400).json({
+                    status: false,
+                    msg: 'ข้อมูล SSO ไม่ครบถ้วน',
+                });
+            }
+
+            const existing = await prisma[$table].findUnique({
+                where: { username: normalized.username },
+            });
+
+            let user;
+            try {
+                if (existing) {
+                    user = await prisma[$table].update({
+                        where: { username: normalized.username },
+                        data: {
+                            sso_pid: normalized.pid,
+                            firstname: normalized.firstname,
+                            surname: normalized.surname,
+                            email: normalized.email,
+                            name: normalized.name,
+                            updated_at: new Date(),
+                            updated_by: `sso:${normalized.username}`,
+                        },
+                    });
+                } else {
+                    user = await prisma[$table].create({
+                        data: {
+                            username: normalized.username,
+                            sso_pid: normalized.pid,
+                            email: normalized.email,
+                            firstname: normalized.firstname,
+                            surname: normalized.surname,
+                            name: normalized.name,
+                            department_id: null,
+                            level: 2,
+                            created_by: 'sso',
+                            updated_by: 'sso',
+                        },
+                    });
+                }
+            } catch (err) {
+                if (err.code === 'P2002' && err.meta?.target?.includes('sso_pid')) {
+                    console.warn('[sso-login] duplicate sso_pid:', normalized.pid);
+                    return res.status(409).json({
+                        status: false,
+                        msg: 'SSO account นี้ถูกผูกกับผู้ใช้อื่นแล้ว',
+                    });
+                }
+                console.error('[sso-login] DB error:', err.message);
+                return res.status(500).json({
+                    status: false,
+                    msg: 'Database error',
+                });
+            }
+
+            const secretKey = process.env.SECRET_KEY;
+            const token = jwt.sign({ ...user }, secretKey, { expiresIn: '90d' });
+
+            console.log(`[sso-login] success: username=${user.username} pid=${normalized.pid}`);
+
+            return res.status(200).json({ ...user, token });
+        } catch (error) {
+            console.error('[sso-login] unhandled:', error);
+            return res.status(500).json({ status: false, msg: error.message });
         }
     },
 
