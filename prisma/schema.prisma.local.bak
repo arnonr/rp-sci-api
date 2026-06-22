@@ -1,0 +1,390 @@
+// This is your Prisma schema file
+// learn more contact it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "mysql"
+    url      = env("DATABASE_URL")
+}
+
+//รอดำเนินการ
+model user {
+    id            Int         @id @default(autoincrement())
+    username      String      @unique @db.VarChar(32)
+    password      String?     @db.VarChar(100)
+    prefix_name   String?     @db.VarChar(100)
+    firstname     String?     @db.VarChar(100)
+    surname       String?     @db.VarChar(100)
+    name          String      @db.VarChar(100)
+    email         String?     @db.VarChar(100)
+    tel           String?     @db.VarChar(100)
+    level         Int?        @default(1)
+    department_id Int?
+    is_active     Int?        @default(1)
+    created_at    DateTime?   @default(now()) @db.DateTime(0)
+    created_by    String?     @db.VarChar(255)
+    updated_at    DateTime?   @updatedAt
+    updated_by    String?     @db.VarChar(255)
+    deleted_at    DateTime?
+    department    department? @relation(fields: [department_id], references: [id])
+    login_log     login_log[]
+    paper         paper[]
+}
+
+model login_log {
+    id         Int       @id @default(autoincrement())
+    user_id    Int
+    logined_at DateTime? @default(now()) @db.DateTime(0)
+    ip_address String?   @db.VarChar(100)
+    user_agent String    @db.VarChar(200)
+    status     Int?      @db.TinyInt
+    created_at DateTime? @default(now()) @db.DateTime(0)
+    created_by String?   @db.VarChar(32)
+    updated_at DateTime? @default(now()) @db.DateTime(0)
+    updated_by String?   @db.VarChar(32)
+    deleted_at DateTime?
+    deleted_by String?   @db.VarChar(32)
+    is_active  Int?      @default(1)
+
+    user user? @relation(fields: [user_id], references: [id])
+}
+
+model file_attach {
+    id Int @id @default(autoincrement())
+
+    paper_id   Int?
+    filename   String? @db.VarChar(200)
+    secret_key String? @db.VarChar(100)
+
+    created_at DateTime? @default(now()) @db.DateTime(0)
+    created_by String?   @db.VarChar(32)
+    updated_at DateTime? @default(now()) @db.DateTime(0)
+    updated_by String?   @db.VarChar(32)
+    deleted_at DateTime?
+    deleted_by String?   @db.VarChar(32)
+    is_active  Int?      @default(1)
+    paper      paper?    @relation(fields: [paper_id], references: [id])
+}
+
+model paper {
+    id                Int            @id @default(autoincrement())
+    rp_no             String?        @db.VarChar(100)
+    running_year      Int?
+    running_code      Int?
+    user_id           Int?
+    title_th          String?        @db.VarChar(1000)
+    title_en          String?        @db.VarChar(1000)
+    abstract          String?        @db.LongText
+    keyword           String?        @db.VarChar(1000)
+    personal_type_id  Int?
+    personal_type     personal_type? @relation(fields: [personal_type_id], references: [id])
+    condition_id      Int?
+    condition         condition?     @relation(fields: [condition_id], references: [id])
+    department_id     Int?
+    paper_type_id     Int?
+    paper_kind_id     Int?
+    history           String?        @db.LongText
+    objective         String?        @db.LongText
+    scope             String?        @db.LongText
+    review_literature String?        @db.LongText
+    method            String?        @db.LongText
+    benefit           String?        @db.LongText
+    location          String?        @db.LongText
+    references        String?        @db.LongText
+    status_id         Int?
+    sended_at         DateTime?
+    sended_user_id    Int?
+    approved_at       DateTime?
+    approved_user_id  Int?
+    approved_detail   String?        @db.LongText
+    created_at        DateTime?      @default(now()) @db.DateTime(0)
+    created_by        String?        @db.VarChar(32)
+    updated_at        DateTime?      @default(now()) @db.DateTime(0)
+    updated_by        String?        @db.VarChar(32)
+    deleted_at        DateTime?
+    deleted_by        String?        @db.VarChar(32)
+    is_active         Int?           @default(1)
+
+    researcher   researcher[]
+    method_list  method_list[]
+    budget       budget[]
+    budget2      budget2[]
+    budget3      budget3[]
+    file_attach  file_attach[]
+    return_paper return_paper[]
+
+    user       user?       @relation(fields: [user_id], references: [id])
+    review     review[]
+    paper_type paper_type? @relation(fields: [paper_type_id], references: [id])
+    department department? @relation(fields: [department_id], references: [id])
+    paper_kind paper_kind? @relation(fields: [paper_kind_id], references: [id])
+
+    @@index([status_id, created_at])
+}
+
+model researcher {
+    id                 Int       @id @default(autoincrement())
+    prefix_name        String?   @db.VarChar(100)
+    firstname          String?   @db.VarChar(1000)
+    surname            String?   @db.VarChar(1000)
+    department_id      Int?
+    researcher_type_id Int?
+    department_text    String?   @db.VarChar(1000)
+    phone_number       String?   @db.VarChar(1000)
+    expertise          String?   @db.VarChar(1000)
+    percentage         Int?
+    paper_id           Int?
+    created_at         DateTime? @default(now()) @db.DateTime(0)
+    created_by         String?   @db.VarChar(32)
+    updated_at         DateTime? @default(now()) @db.DateTime(0)
+    updated_by         String?   @db.VarChar(32)
+    deleted_at         DateTime?
+    deleted_by         String?   @db.VarChar(32)
+    is_active          Int?      @default(1)
+
+    paper           paper?           @relation(fields: [paper_id], references: [id])
+    department      department?      @relation(fields: [department_id], references: [id])
+    researcher_type researcher_type? @relation(fields: [researcher_type_id], references: [id])
+}
+
+model method_list {
+    id         Int       @id @default(autoincrement())
+    start_date DateTime? @default(now()) @db.DateTime(0)
+    end_date   DateTime? @default(now()) @db.DateTime(0)
+    detail     String?
+    paper_id   Int?
+    created_at DateTime? @default(now()) @db.DateTime(0)
+    created_by String?   @db.VarChar(32)
+    updated_at DateTime? @default(now()) @db.DateTime(0)
+    updated_by String?   @db.VarChar(32)
+    deleted_at DateTime?
+    deleted_by String?   @db.VarChar(32)
+    is_active  Int?      @default(1)
+
+    paper paper? @relation(fields: [paper_id], references: [id])
+}
+
+model budget {
+    id         Int       @id @default(autoincrement())
+    detail     String?
+    amount     Decimal?  @default(0.00) @db.Decimal(precision: 10, scale: 2)
+    paper_id   Int?
+    created_at DateTime? @default(now()) @db.DateTime(0)
+    created_by String?   @db.VarChar(32)
+    updated_at DateTime? @default(now()) @db.DateTime(0)
+    updated_by String?   @db.VarChar(32)
+    deleted_at DateTime?
+    deleted_by String?   @db.VarChar(32)
+    is_active  Int?      @default(1)
+    paper      paper?    @relation(fields: [paper_id], references: [id])
+}
+
+model budget2 {
+    id         Int       @id @default(autoincrement())
+    detail     String?
+    amount     Decimal?  @default(0.00) @db.Decimal(precision: 10, scale: 2)
+    paper_id   Int?
+    created_at DateTime? @default(now()) @db.DateTime(0)
+    created_by String?   @db.VarChar(32)
+    updated_at DateTime? @default(now()) @db.DateTime(0)
+    updated_by String?   @db.VarChar(32)
+    deleted_at DateTime?
+    deleted_by String?   @db.VarChar(32)
+    is_active  Int?      @default(1)
+    paper      paper?    @relation(fields: [paper_id], references: [id])
+}
+
+model budget3 {
+    id         Int       @id @default(autoincrement())
+    detail     String?
+    amount     Decimal?  @default(0.00) @db.Decimal(precision: 10, scale: 2)
+    paper_id   Int?
+    created_at DateTime? @default(now()) @db.DateTime(0)
+    created_by String?   @db.VarChar(32)
+    updated_at DateTime? @default(now()) @db.DateTime(0)
+    updated_by String?   @db.VarChar(32)
+    deleted_at DateTime?
+    deleted_by String?   @db.VarChar(32)
+    is_active  Int?      @default(1)
+    paper      paper?    @relation(fields: [paper_id], references: [id])
+}
+
+model return_paper {
+    id            Int       @id @default(autoincrement())
+    detail        String?
+    paper_id      Int?
+    return_status Int?
+    created_at    DateTime? @default(now()) @db.DateTime(0)
+    created_by    String?   @db.VarChar(32)
+    updated_at    DateTime? @default(now()) @db.DateTime(0)
+    updated_by    String?   @db.VarChar(32)
+    deleted_at    DateTime?
+    deleted_by    String?   @db.VarChar(32)
+    is_active     Int?      @default(1)
+    paper         paper?    @relation(fields: [paper_id], references: [id])
+}
+
+model review {
+    id                Int       @id @default(autoincrement())
+    detail            String?
+    review_status     Int?
+    reviewer_id       Int?
+    paper_id          Int?
+    is_send_mail      Int?
+    time_no_send_mail Int?
+    score_1           Int?
+    score_2           Int?
+    score_3           Int?
+    score_4           Int?
+    score_5           Int?
+    score_6           Int?
+    score_7           Int?
+    score_8           Int?
+    score_9           Int?
+    score_10          Int?
+    score_11          Int?
+    score_12          Int?
+    score_13          Int?
+    budget_status     Int?
+    review_file       String?   @db.VarChar(1000)
+    comment           String?   @db.LongText
+    budget_comment    String?   @db.LongText
+    confident_comment String?   @db.LongText
+    created_at        DateTime? @default(now()) @db.DateTime(0)
+    created_by        String?   @db.VarChar(32)
+    updated_at        DateTime? @default(now()) @db.DateTime(0)
+    updated_by        String?   @db.VarChar(32)
+    deleted_at        DateTime?
+    deleted_by        String?   @db.VarChar(32)
+    is_active         Int?      @default(1)
+    paper             paper?    @relation(fields: [paper_id], references: [id])
+    reviewer          reviewer? @relation(fields: [reviewer_id], references: [id])
+}
+
+model reviewer {
+    id                 Int       @id @default(autoincrement())
+    position           String?   @db.VarChar(1000)
+    prefix_name        String?   @db.VarChar(1000)
+    firstname          String?   @db.VarChar(1000)
+    surname            String?   @db.VarChar(1000)
+    address            String?   @db.LongText
+    name_account_bank  String?   @db.VarChar(1000)
+    no_account_bank    String?   @db.VarChar(1000)
+    name_bank          String?   @db.VarChar(1000)
+    email              String?   @db.VarChar(1000)
+    password           String?   @db.VarChar(1000)
+    organization_name  String?   @db.VarChar(1000)
+    created_at         DateTime? @default(now()) @db.DateTime(0)
+    created_by         String?   @db.VarChar(32)
+    updated_at         DateTime? @default(now()) @db.DateTime(0)
+    updated_by         String?   @db.VarChar(32)
+    deleted_at         DateTime?
+    deleted_by         String?   @db.VarChar(32)
+    is_active          Int?      @default(1)
+    is_change_password Boolean   @default(true)
+    review             review[]
+}
+
+model paper_type {
+    id         Int       @id @default(autoincrement())
+    name       String?   @db.VarChar(1000)
+    start_date DateTime? @default(now()) @db.DateTime(0)
+    end_date   DateTime? @default(now()) @db.DateTime(0)
+    year       String?   @db.VarChar(1000)
+    created_at DateTime? @default(now()) @db.DateTime(0)
+    created_by String?   @db.VarChar(32)
+    updated_at DateTime? @default(now()) @db.DateTime(0)
+    updated_by String?   @db.VarChar(32)
+    deleted_at DateTime?
+    deleted_by String?   @db.VarChar(32)
+    is_active  Int?      @default(1)
+    paper      paper[]
+}
+
+model paper_kind {
+    id         Int       @id @default(autoincrement())
+    name       String?   @db.VarChar(1000)
+    created_at DateTime? @default(now()) @db.DateTime(0)
+    created_by String?   @db.VarChar(32)
+    updated_at DateTime? @default(now()) @db.DateTime(0)
+    updated_by String?   @db.VarChar(32)
+    deleted_at DateTime?
+    deleted_by String?   @db.VarChar(32)
+    is_active  Int?      @default(1)
+    paper      paper[]
+}
+
+model researcher_type {
+    id         Int          @id @default(autoincrement())
+    name       String?      @db.VarChar(1000)
+    year       String?      @db.VarChar(1000)
+    created_at DateTime?    @default(now()) @db.DateTime(0)
+    created_by String?      @db.VarChar(32)
+    updated_at DateTime?    @default(now()) @db.DateTime(0)
+    updated_by String?      @db.VarChar(32)
+    deleted_at DateTime?
+    deleted_by String?      @db.VarChar(32)
+    is_active  Int?         @default(1)
+    researcher researcher[]
+}
+
+model department {
+    id         Int          @id @default(autoincrement())
+    code       String       @db.VarChar(100)
+    name       String?      @db.VarChar(1000)
+    created_at DateTime?    @default(now()) @db.DateTime(0)
+    created_by String?      @db.VarChar(32)
+    updated_at DateTime?    @default(now()) @db.DateTime(0)
+    updated_by String?      @db.VarChar(32)
+    deleted_at DateTime?
+    deleted_by String?      @db.VarChar(32)
+    is_active  Int?         @default(1)
+    paper      paper[]
+    user       user[]
+    researcher researcher[]
+}
+
+model about {
+    id         Int       @id @default(autoincrement())
+    title      String?   @db.VarChar(1000)
+    detail     String?   @db.LongText
+    created_at DateTime? @default(now()) @db.DateTime(0)
+    created_by String?   @db.VarChar(32)
+    updated_at DateTime? @default(now()) @db.DateTime(0)
+    updated_by String?   @db.VarChar(32)
+    deleted_at DateTime?
+    deleted_by String?   @db.VarChar(32)
+    is_active  Int?      @default(1)
+}
+
+model personal_type {
+    id         Int       @id @default(autoincrement())
+    name       String?   @db.VarChar(1000)
+    created_at DateTime? @default(now()) @db.DateTime(0)
+    created_by String?   @db.VarChar(32)
+    updated_at DateTime? @default(now()) @db.DateTime(0)
+    updated_by String?   @db.VarChar(32)
+    deleted_at DateTime?
+    deleted_by String?   @db.VarChar(32)
+    is_active  Int?      @default(1)
+    paper      paper[]
+    condition  condition[]
+}
+
+model condition {
+    id               Int            @id @default(autoincrement())
+    name             String?        @db.VarChar(1000)
+    personal_type_id Int?
+    personal_type    personal_type? @relation(fields: [personal_type_id], references: [id])
+    created_at       DateTime?      @default(now()) @db.DateTime(0)
+    created_by       String?        @db.VarChar(32)
+    updated_at       DateTime?      @default(now()) @db.DateTime(0)
+    updated_by       String?        @db.VarChar(32)
+    deleted_at       DateTime?
+    deleted_by       String?        @db.VarChar(32)
+    is_active        Int?           @default(1)
+    paper            paper[]
+}

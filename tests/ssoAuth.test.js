@@ -47,10 +47,10 @@ describe('ssoAuth.getUserInfoFromSSO', () => {
   });
 
   test('returns raw userinfo on success', async () => {
-    const profile = { username: 'u1', pid: 'p1', displayname: 'U One', email: 'u1@x' };
-    axios.get.mockResolvedValue({ data: profile });
+    const data = { sub: 's1', preferred_username: 'u1' };
+    axios.get.mockResolvedValue({ data });
     const result = await getUserInfoFromSSO('tok');
-    expect(result).toEqual(profile);
+    expect(result).toEqual(data);
     expect(axios.get).toHaveBeenCalledWith(
       'https://sso.test/userinfo',
       expect.objectContaining({ headers: { Authorization: 'Bearer tok' } })
@@ -63,49 +63,58 @@ describe('ssoAuth.getUserInfoFromSSO', () => {
   });
 });
 
+// KMUTNB SSO returns standard OIDC claims: sub, preferred_username, name, given_name, family_name, email
 describe('ssoAuth.normalizeSSOUserInfo', () => {
-  test('maps displayname to firstname/surname and keeps pid/username/email', () => {
+  test('maps OIDC claims to user fields using sub as pid', () => {
     const raw = {
-      username: 'somchai',
-      pid: '1234567890123',
-      displayname: 'Somchai Jaidee',
-      email: 'somchai@x',
-      faculty_code: 'sci',
-      department_code: 'sci-cs',
+      sub: 'arnonr',
+      preferred_username: 'arnonr',
+      name: 'Arnon Rukjak',
+      given_name: 'Arnon',
+      family_name: 'Rukjak',
+      email: 'arnonr@kmutnb.ac.th',
+      email_verified: true,
     };
     const out = normalizeSSOUserInfo(raw);
     expect(out).toEqual({
-      username: 'somchai',
-      pid: '1234567890123',
-      email: 'somchai@x',
-      firstname: 'Somchai',
-      surname: 'Jaidee',
-      name: 'Somchai Jaidee',
+      username: 'arnonr',
+      pid: 'arnonr',
+      email: 'arnonr@kmutnb.ac.th',
+      prefix_name: null,
+      firstname: 'Arnon',
+      surname: 'Rukjak',
+      name: 'Arnon Rukjak',
     });
   });
 
-  test('handles single-word displayname (no surname)', () => {
-    const raw = { username: 'u', pid: 'p', displayname: 'Cherprang', email: 'c@x' };
+  test('falls back to sub when preferred_username missing', () => {
+    const raw = { sub: 's2', email: 's2@x' };
     const out = normalizeSSOUserInfo(raw);
-    expect(out.firstname).toBe('Cherprang');
-    expect(out.surname).toBe('');
-    expect(out.name).toBe('Cherprang');
+    expect(out.username).toBe('s2');
+    expect(out.pid).toBe('s2');
   });
 
-  test('handles 3-word displayname (joins rest as surname)', () => {
-    const raw = { username: 'u', pid: 'p', displayname: 'A B C', email: 'a@x' };
+  test('builds name from given_name + family_name when name is missing', () => {
+    const raw = { sub: 's3', preferred_username: 'u3', given_name: 'A', family_name: 'B' };
     const out = normalizeSSOUserInfo(raw);
-    expect(out.firstname).toBe('A');
-    expect(out.surname).toBe('B C');
+    expect(out.name).toBe('A B');
   });
 
-  test('throws when username missing', () => {
-    expect(() => normalizeSSOUserInfo({ pid: 'p', displayname: 'X', email: 'x@x' }))
-      .toThrow('username');
+  test('handles missing optional fields (returns nulls, not crash)', () => {
+    const raw = { sub: 's4' };
+    const out = normalizeSSOUserInfo(raw);
+    expect(out).toEqual({
+      username: 's4',
+      pid: 's4',
+      email: null,
+      prefix_name: null,
+      firstname: null,
+      surname: null,
+      name: null,
+    });
   });
 
-  test('throws when pid missing', () => {
-    expect(() => normalizeSSOUserInfo({ username: 'u', displayname: 'X', email: 'x@x' }))
-      .toThrow('pid');
+  test('throws when sub is missing', () => {
+    expect(() => normalizeSSOUserInfo({})).toThrow('sub');
   });
 });

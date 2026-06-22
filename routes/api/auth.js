@@ -12,6 +12,7 @@ const loginValidator = [
 ];
 
 router.post("/login", controllers.onLogin);
+router.post("/sso-login", controllers.onSSOLogin);
 router.get("/:id", controllers.onGetById);
 
 module.exports = router;

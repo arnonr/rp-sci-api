@@ -56,9 +56,10 @@ describe('AuthController.onSSOLogin', () => {
 
   test('links existing user and returns JWT', async () => {
     ssoAuth.exchangeCodeForToken.mockResolvedValue({ access_token: 'tok' });
-    ssoAuth.getUserInfoFromSSO.mockResolvedValue({ username: 'u', pid: 'p' });
+    ssoAuth.getUserInfoFromSSO.mockResolvedValue({ profile: { pid: 'p', username: 'u' } });
     ssoAuth.normalizeSSOUserInfo.mockReturnValue({
-      username: 'u', pid: 'p', email: 'u@x', firstname: 'F', surname: 'S', name: 'F S',
+      username: 'u', pid: 'p', email: 'u@x', prefix_name: 'P',
+      firstname: 'F', surname: 'S', name: 'P F S',
     });
     const existing = {
       id: 1, username: 'u', level: 1, department_id: 5,
@@ -75,7 +76,7 @@ describe('AuthController.onSSOLogin', () => {
       expect.objectContaining({
         where: { username: 'u' },
         data: expect.objectContaining({
-          sso_pid: 'p', firstname: 'F', surname: 'S', email: 'u@x',
+          sso_pid: 'p', prefix_name: 'P', firstname: 'F', surname: 'S', email: 'u@x',
         }),
       })
     );
@@ -91,9 +92,10 @@ describe('AuthController.onSSOLogin', () => {
 
   test('creates new user when not found', async () => {
     ssoAuth.exchangeCodeForToken.mockResolvedValue({ access_token: 'tok' });
-    ssoAuth.getUserInfoFromSSO.mockResolvedValue({ username: 'new', pid: 'p-new' });
+    ssoAuth.getUserInfoFromSSO.mockResolvedValue({ profile: { pid: 'p-new', username: 'new' } });
     ssoAuth.normalizeSSOUserInfo.mockReturnValue({
-      username: 'new', pid: 'p-new', email: 'n@x', firstname: 'New', surname: 'User', name: 'New User',
+      username: 'new', pid: 'p-new', email: 'n@x', prefix_name: 'P',
+      firstname: 'New', surname: 'User', name: 'P New User',
     });
     mockUserFindUnique.mockResolvedValue(null);
     const created = {
@@ -108,7 +110,7 @@ describe('AuthController.onSSOLogin', () => {
     expect(mockUserCreate).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
-          username: 'new', sso_pid: 'p-new', level: 2, department_id: null,
+          username: 'new', sso_pid: 'p-new', prefix_name: 'P', level: 2, department_id: null,
           created_by: 'sso', updated_by: 'sso',
         }),
       })
@@ -118,9 +120,10 @@ describe('AuthController.onSSOLogin', () => {
 
   test('returns 409 on duplicate sso_pid', async () => {
     ssoAuth.exchangeCodeForToken.mockResolvedValue({ access_token: 'tok' });
-    ssoAuth.getUserInfoFromSSO.mockResolvedValue({ username: 'u', pid: 'p-dup' });
+    ssoAuth.getUserInfoFromSSO.mockResolvedValue({ profile: { pid: 'p-dup', username: 'u' } });
     ssoAuth.normalizeSSOUserInfo.mockReturnValue({
-      username: 'u', pid: 'p-dup', email: 'u@x', firstname: 'F', surname: 'S', name: 'F S',
+      username: 'u', pid: 'p-dup', email: 'u@x', prefix_name: null,
+      firstname: 'F', surname: 'S', name: 'F S',
     });
     mockUserFindUnique.mockResolvedValue({ id: 1, username: 'u' });
     const prismaError = new Error('Unique constraint failed');

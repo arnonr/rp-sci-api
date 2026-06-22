@@ -27,18 +27,33 @@ const getUserInfoFromSSO = async (accessToken) => {
   return data;
 };
 
+// KMUTNB SSO /resources/userinfo returns standard OIDC claims:
+//   { sub, preferred_username, name, given_name, family_name, email, ... }
+// - sub: unique subject ID at the IdP → use as both username and sso_pid
+// - preferred_username: the user's preferred login (often same as sub)
+// - given_name/family_name: firstname/surname
+// There is no `pid` field in the default openid profile email scope.
 const normalizeSSOUserInfo = (userInfoData) => {
-  const { username, pid, displayname, email } = userInfoData;
+  const sub = userInfoData?.sub ?? null;
+  const username = userInfoData?.preferred_username ?? sub;
+  const email = userInfoData?.email ?? null;
+  const firstname = userInfoData?.given_name ?? null;
+  const surname = userInfoData?.family_name ?? null;
+  const name =
+    userInfoData?.name ?? ([firstname, surname].filter(Boolean).join(' ') || null);
 
+  if (!sub) throw new Error('SSO profile is missing sub');
   if (!username) throw new Error('SSO profile is missing username');
-  if (!pid) throw new Error('SSO profile is missing pid');
 
-  const name = displayname || '';
-  const parts = name.split(' ').filter(Boolean);
-  const firstname = parts[0] || '';
-  const surname = parts.slice(1).join(' ');
-
-  return { username, pid, email, firstname, surname, name };
+  return {
+    username,
+    pid: sub,
+    email,
+    prefix_name: null,
+    firstname,
+    surname,
+    name,
+  };
 };
 
 module.exports = { exchangeCodeForToken, getUserInfoFromSSO, normalizeSSOUserInfo };

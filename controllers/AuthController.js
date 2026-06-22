@@ -212,6 +212,7 @@ const methods = {
                         where: { username: normalized.username },
                         data: {
                             sso_pid: normalized.pid,
+                            prefix_name: normalized.prefix_name,
                             firstname: normalized.firstname,
                             surname: normalized.surname,
                             email: normalized.email,
@@ -225,6 +226,7 @@ const methods = {
                         data: {
                             username: normalized.username,
                             sso_pid: normalized.pid,
+                            prefix_name: normalized.prefix_name,
                             email: normalized.email,
                             firstname: normalized.firstname,
                             surname: normalized.surname,
