@@ -36,6 +36,9 @@ app.use(process.env.URL_STATIC, express.static(__dirname + "/public"));
 
 app.use(routes);
 
+const { initDatabase } = require("./utils/initDatabase");
+
 app.listen(port, () => {
     console.log(`Server listening on port ${port}`);
+    initDatabase();
 });
